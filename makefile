@@ -13,12 +13,15 @@ LIBRARY = 42bets
 
 OBJS =	$(patsubst %.cpp,%.o,$(SRCS)) 
 
-HDRS = 	arthur/exception.hpp \
+HDRS = 	arthur/entry_exit.hpp \
+		arthur/exception.hpp \
 		arthur/memory.hpp \
+		deepthgt/CommandHandler.hpp \
 		deepthgt/Exception.hpp \
-		earth/Exception.hpp
+		deepthgt/TradingEngine.hpp
 SRCS = 	Main.cpp \
-		deepthgt/AdminHandler.cpp
+		deepthgt/CommandHandler.cpp \
+		deepthgt/TradingEngine.cpp
 
 all: $(SRCS) $(LIBRARY)
 

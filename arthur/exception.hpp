@@ -8,7 +8,7 @@
 #include <sstream>
 #include <utility>
 #include <vector>
- 
+
 namespace {
 
     template <typename T>
@@ -20,10 +20,10 @@ namespace {
         }
         os << ']';
         return os;
-    }
+    }    
 
 } //namespace annonymous
-       
+         
 namespace bets42 { namespace arthur {
 
     template <typename TDerived>
