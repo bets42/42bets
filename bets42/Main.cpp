@@ -1,6 +1,8 @@
 #include "bets42/arthur/exception.hpp"
 #include "bets42/deepthgt/TradingEngine.hpp"
 #include <boost/program_options.hpp>
+#include <glog/logging.h>
+#include <glog/log_severity.h>
 #include <cassert>
 #include <iostream>
 #include <string>
@@ -15,7 +17,31 @@ namespace {
             : bets42::arthur::streaming_exception<MainException>(file, line) {}
     };  
 
+    struct LogInitializer
+    {
+        LogInitializer(const std::string& dir,   
+                       const std::string& filename)
+        {
+            google::InitGoogleLogging(filename.c_str());
+            google::SetLogDestination(google::INFO, dir.c_str());
+            google::SetLogSymlink(google::INFO, filename.c_str());
+            google::LogToStderr();
+
+            FLAGS_minloglevel = google::INFO;
+
+            LOG(INFO) << "Started logging at level " << google::GetLogSeverityName(FLAGS_minloglevel);  
+        }
+
+        ~LogInitializer() 
+        {
+            LOG(INFO) << "Finished logging";  
+            google::ShutdownGoogleLogging();
+        }
+    };
+       
 } //namespace annonymous
+
+//TODO: make log level settable via cmd line arguments
 
 int main(int argc, char *argv[])
 {
@@ -28,6 +54,9 @@ int main(int argc, char *argv[])
 
         prog_opts::options_description running("Running options");
         running.add_options()
+            ("algo", prog_opts::value<std::string>(), "Algo which trading engine should run; select from [PRE_RACE_HORSE_SWING]")
+            ("exchanges", prog_opts::value<std::vector<std::string>>(), "Exchange(s) to which the trading engine will connect; select from [BETFAIR|BETDAQ]")
+            ("instance", prog_opts::value<unsigned>(), "Instance number, useful when running multiple instances of same algo")
             ("cmd_port", prog_opts::value<unsigned short>(), "Port on which commands will be listened for")
             ("log_dir", prog_opts::value<std::string>(), "Log directory into which log files will be written")
             ("log_name", prog_opts::value<std::string>(), "Name of the file to write logs to");
@@ -56,16 +85,28 @@ int main(int argc, char *argv[])
         {
             std::cout << all << std::endl;
         }
-        else if(varsMap.count("cmd_port") && varsMap.count("log_dir") && varsMap.count("log_name"))
+        else if(varsMap.count("algo")
+                && varsMap.count("exchanges")
+                && varsMap.count("instance")
+                && varsMap.count("cmd_port") 
+                && varsMap.count("log_dir") 
+                && varsMap.count("log_name"))
         {
+            //logging
+            const auto logDir(varsMap["log_dir"].as<std::string>());
+            const auto logName(varsMap["log_name"].as<std::string>() 
+                                + boost::lexical_cast<std::string>(varsMap["instance"].as<unsigned>()));
+
+            const LogInitializer logInit(logDir, logName);
+
+            //create & run engine
             try
             {   
+                const auto algo(varsMap["algo"].as<std::string>());
+                const auto exchanges(varsMap["exchanges"].as<std::vector<std::string>>());
                 const auto cmdPort(varsMap["cmd_port"].as<unsigned short>());
-                const auto logDir(varsMap["log_dir"].as<std::string>());
-                const auto logName(varsMap["log_name"].as<std::string>());
 
-                bets42::deepthgt::TradingEngine engine(cmdPort, logDir, logName, "INFO");
-                engine.run();
+                bets42::deepthgt::TradingEngineFactory::create(algo, exchanges, cmdPort)->run();
             }
             catch(const std::exception& e)
             {

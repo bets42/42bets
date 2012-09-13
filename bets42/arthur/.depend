@@ -1,0 +1,5 @@
+test_main.o: test/test_main.cpp
+test_abstract_factory.o: test/test_abstract_factory.cpp \
+  ../../bets42/arthur/test/test_abstract_factory.hpp \
+  ../../bets42/arthur/abstract_factory.hpp \
+  ../../bets42/arthur/exception.hpp

@@ -1,0 +1,6 @@
+# swap files
+*.swp
+*.swo
+
+# compiled files
+*.o

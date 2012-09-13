@@ -6,7 +6,7 @@
 
 CC = clang++
 WARNINGS = -Wno-c++98-compat -Wno-weak-vtables
-CFLAGS = -g -Weverything -Wall -std=c++11 -stdlib=libc++ $(WARNINGS) -I../ -I/usr/local/include
+CFLAGS = -g -Weverything -Wall -std=c++11 -stdlib=libc++ $(WARNINGS) -I../ -I/usr/local/include 
 LDFLAGS = -stdlib=libc++ -L/usr/local/boost_1_50_0/stage/lib -L/usr/local/lib -lboost_program_options -lboost_system -lglog
 
 LIBRARY = 42bets
@@ -18,10 +18,12 @@ HDRS = 	arthur/entry_exit.hpp \
 		arthur/memory.hpp \
 		deepthgt/CommandHandler.hpp \
 		deepthgt/Exception.hpp \
-		deepthgt/TradingEngine.hpp
+		deepthgt/TradingEngine.hpp \
+		deepthgt/TradingEngineImpl.hpp
 SRCS = 	Main.cpp \
 		deepthgt/CommandHandler.cpp \
-		deepthgt/TradingEngine.cpp
+		deepthgt/TradingEngineImpl.cpp \
+		deepthgt/TickCaptureAlgo.cpp
 
 all: $(SRCS) $(LIBRARY)
 

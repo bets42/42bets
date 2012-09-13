@@ -73,6 +73,12 @@ namespace bets42 { namespace arthur {
            mutable std::string  what_;
     };
 
+    struct exception : public streaming_exception<exception>
+    {
+        exception(const std::string& file, const long line)
+            : streaming_exception<exception>(file, line) {}
+    };
+
 }} //namespace bets42::arthur
 
 #endif //BETS42_ARTHUR_STREAMING_EXCEPTION_HPP
