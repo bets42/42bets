@@ -33,17 +33,12 @@ namespace bets42 { namespace arthur {
             template <typename TDerived>
             bool register_type(const key_type& key)
             {
-                std::cout << key << std::endl;
                 const auto factory(create_impl<TDerived, TArgs...>);
                 return factories_.insert(typename factory_map::value_type(key, factory)).second;
             }
 
             std::unique_ptr<T> create(const key_type& key, TArgs... args) const
             {
-                std::cout << "Print" << std::endl;
-                for(const auto f : factories_) {
-                    std::cout << f.first << std::endl;
-                }
                 const auto iter(factories_.find(key));
 
                 if(iter == std::end(factories_)) {
