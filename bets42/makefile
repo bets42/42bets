@@ -22,7 +22,6 @@ HDRS = 	arthur/entry_exit.hpp \
 		deepthgt/TradingEngineImpl.hpp
 SRCS = 	Main.cpp \
 		deepthgt/CommandHandler.cpp \
-		deepthgt/TradingEngineImpl.cpp \
 		deepthgt/TickCaptureAlgo.cpp
 
 all: $(SRCS) $(LIBRARY)

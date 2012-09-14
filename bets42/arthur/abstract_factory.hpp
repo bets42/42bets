@@ -42,7 +42,6 @@ namespace bets42 { namespace arthur {
                 const auto iter(factories_.find(key));
 
                 if(iter == std::end(factories_)) {
-
                     throw exception(__FILE__, __LINE__) << "Can't create unknown type " << key;
                 }
 

@@ -15,7 +15,7 @@ namespace bets42 { namespace deepthgt {
         virtual void run() = 0;
     };
 
-   typedef arthur::static_abstract_factory<TradingEngine, std::vector<std::string>, unsigned short> TradingEngineFactory;
+   typedef arthur::static_abstract_factory<TradingEngine, const std::vector<std::string>&, unsigned short> TradingEngineFactory;
 
 }} //namespace bets42::deepthgt
 
