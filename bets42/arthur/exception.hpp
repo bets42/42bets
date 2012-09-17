@@ -9,20 +9,17 @@
 #include <utility>
 #include <vector>
 
-namespace {
-
+namespace
+{
     template <typename T>
     std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec)
     {
         os << '[';
-        for(const auto val : vec) {
-            os << val << ",";
-        }
+        for(const auto val : vec) { os << val << ","; } 
         os << ']';
         return os;
     }    
-
-} //namespace annonymous
+}
          
 namespace bets42 { namespace arthur {
 
@@ -79,6 +76,6 @@ namespace bets42 { namespace arthur {
             : streaming_exception<exception>(file, line) {}
     };
 
-}} //namespace bets42::arthur
+}}
 
 #endif //BETS42_ARTHUR_STREAMING_EXCEPTION_HPP

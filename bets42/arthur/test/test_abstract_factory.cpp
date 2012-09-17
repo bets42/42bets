@@ -28,19 +28,19 @@ namespace {
     typedef static_abstract_factory<Fruit> fruit_factory_type;
 
     struct RegistrarApple : public Fruit,
-                            private fruit_factory_type::registrar<RegistrarApple>
+                            private fruit_factory_type::registrant<RegistrarApple>
     {
         virtual ~RegistrarApple() {}
         virtual std::string name() const { return "Apple"; }
-        static std::string registrar_key() { return "apple"; }
+        static std::string registrant_key() { return "apple"; }
     };
 
     struct RegistrarBanana : public Fruit,
-                             private fruit_factory_type::registrar<RegistrarBanana>
+                             private fruit_factory_type::registrant<RegistrarBanana>
     {
         virtual ~RegistrarBanana() {}
         virtual std::string name() const { return "Banana"; }
-        static std::string registrar_key() { return "banana"; }
+        static std::string registrant_key() { return "banana"; }
     }; 
 
     /* LUNCH BOX */
@@ -60,10 +60,10 @@ namespace {
 
     template <typename TFruit>
     struct RegistrarLunchBoxImpl : public LunchBox,
-                                   private static_abstract_factory<LunchBox>::registrar<RegistrarLunchBoxImpl<TFruit>>
+                                   private static_abstract_factory<LunchBox>::registrant<RegistrarLunchBoxImpl<TFruit>>
     {
         virtual ~RegistrarLunchBoxImpl() {}
-        static std::string registrar_key() { return "lunch_box_with_" + TFruit::registrar_key(); }
+        static std::string registrant_key() { return "lunch_box_with_" + TFruit::registrant_key(); }
         virtual const Fruit& fruit() const { return fruit_; }
         TFruit fruit_;
     };
@@ -86,12 +86,12 @@ namespace {
     };
 
     struct RegistrarCokeZero : public Drink,
-                               private static_abstract_factory<Drink, unsigned>::registrar<RegistrarCokeZero>
+                               private static_abstract_factory<Drink, unsigned>::registrant<RegistrarCokeZero>
     {
         explicit RegistrarCokeZero(const unsigned volume) 
             : volume_(volume) {}
 
-        static std::string registrar_key() { return "coke_zero"; }
+        static std::string registrant_key() { return "coke_zero"; }
 
         unsigned volume() const { return volume_; }
 

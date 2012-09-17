@@ -2,17 +2,16 @@
 #define BETS42_DEEPTHGT_TICK_CAPTURE_ALGO_HPP
 
 #include "bets42/deepthgt/Algo.hpp"
-#include "bets42/deepthgt/TradingEngine.hpp"
-#include "bets42/deepthgt/TradingEngineImpl.hpp"
+#include "bets42/deepthgt/CommandHandler.hpp"
 
 namespace bets42 { namespace deepthgt {
 
-    struct TickCaptureAlgo : public Algo,
-                             public TradingEngineFactory::registrar<TradingEngineImpl<TickCaptureAlgo>>
+    struct TickCaptureAlgo : public Algo<TickCaptureAlgo>
     {
-        virtual ~TickCaptureAlgo() {}
+        explicit TickCaptureAlgo(CommandHandler::Registrar& cmdRegistrar);
+        virtual ~TickCaptureAlgo();
 
-        static const std::string& registrar_key();
+        static const std::string& name();
     };
 
 }} //namespace bets42::deepthgt

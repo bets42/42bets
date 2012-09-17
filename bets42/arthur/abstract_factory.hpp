@@ -8,17 +8,17 @@
 #include <string>
 #include <unordered_map>
 
-namespace {
-
+namespace 
+{
     template <typename T, typename... TArgs>
-    std::unique_ptr<T> create_impl(TArgs... args) { 
+    std::unique_ptr<T> create_impl(TArgs... args) 
+    { 
         return bets42::arthur::make_unique<T>(args...); 
     }
 
     //http://stackoverflow.com/questions/6420985/how-to-force-a-static-member-to-be-initialized
     template <typename V, V> struct force_static_init_trick {};
-
-} //namespace annonymous 
+}
 
 namespace bets42 { namespace arthur {
 
@@ -41,7 +41,8 @@ namespace bets42 { namespace arthur {
             {
                 const auto iter(factories_.find(key));
 
-                if(iter == std::end(factories_)) {
+                if(iter == std::end(factories_))
+                {
                     throw exception(__FILE__, __LINE__) << "Can't create unknown type " << key;
                 }
 
@@ -57,8 +58,8 @@ namespace bets42 { namespace arthur {
     {
         private:
             typedef abstract_factory<T, TArgs...> factory_type;
-
             static factory_type factory_;
+
             typedef force_static_init_trick<factory_type&, factory_> force_static_init_trick_factory;
 
         public:
@@ -68,21 +69,23 @@ namespace bets42 { namespace arthur {
             }
 
             template <typename TDerived>
-            class registrar
+            class registrant
             {
                 protected:
-                    virtual ~registrar() {}
+                    virtual ~registrant() {}
 
                 private:
-                    struct registrar_impl
+                    struct registrant_impl
                     {
-                        registrar_impl() {
-                            factory_.template register_type<TDerived>(TDerived::registrar_key());
+                        registrant_impl() 
+                        {
+                            factory_.template register_type<TDerived>(TDerived::registrant_key());
                         }
                     };
-                    
-                    static registrar_impl impl_;
-                    typedef force_static_init_trick<registrar_impl&, impl_> force_static_init_trick_impl;
+
+                    static registrant_impl impl_;
+
+                    typedef force_static_init_trick<registrant_impl&, impl_> force_static_init_trick_impl;
             };
     };
 
@@ -91,8 +94,8 @@ namespace bets42 { namespace arthur {
 
     template <typename T, typename... TArgs>
     template <typename TDerived>
-    typename static_abstract_factory<T, TArgs...>::template registrar<TDerived>::registrar_impl static_abstract_factory<T, TArgs...>::registrar<TDerived>::impl_;
+    typename static_abstract_factory<T, TArgs...>::template registrant<TDerived>::registrant_impl static_abstract_factory<T, TArgs...>::registrant<TDerived>::impl_;
 
-}} //namespace bets42::arthur
+}}
 
 #endif //BETS42_ARTHUR_ABSTRACT_FACTORY_HPP

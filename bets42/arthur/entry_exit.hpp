@@ -6,24 +6,24 @@
 
 namespace bets42 { namespace arthur {
 
-    class EntryExit
+    class entry_exit
     {
         public:
-            EntryExit(const std::string& entryMsg, const std::string& exitMsg) 
-                : exitMsg_(exitMsg)
+            entry_exit(const std::string& entry_msg, const std::string& exit_msg) 
+                : exit_msg_(exit_msg)
             { 
-                LOG(INFO) << entryMsg; 
+                LOG(INFO) << entry_msg; 
             }
 
-            ~EntryExit() 
+            ~entry_exit() 
             { 
-                LOG(INFO) << exitMsg_; 
+                LOG(INFO) << exit_msg_; 
             }
         
         private:
-            const std::string exitMsg_;
+            const std::string exit_msg_;
     };
 
-}} //namespace bets::arthur
+}}
 
 #endif //BET42_ARTHUR_ENTRY_EXIT_HPP

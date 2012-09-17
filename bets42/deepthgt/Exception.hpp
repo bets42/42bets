@@ -12,6 +12,6 @@ namespace bets42 { namespace deepthgt {
             : arthur::streaming_exception<Exception>(file, line) {}
     }; 
 
-}} //namespace bets42::deepthgt
+}}
 
 #endif //BETS42_DEEPTHGT_EXCEPTION_HPP

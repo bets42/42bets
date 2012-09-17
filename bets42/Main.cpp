@@ -106,7 +106,8 @@ int main(int argc, char *argv[])
                 const auto exchanges(varsMap["exchanges"].as<std::vector<std::string>>());
                 const auto cmdPort(varsMap["cmd_port"].as<unsigned short>());
 
-                bets42::deepthgt::TradingEngineFactory::create(algo, exchanges, cmdPort)->run();
+                auto engine(bets42::deepthgt::TradingEngineFactory::create(algo, exchanges, cmdPort));
+                engine->run();
             }
             catch(const std::exception& e)
             {

@@ -1,138 +1,122 @@
 #include "bets42/deepthgt/CommandHandler.hpp"
-#include "bets42/deepthgt/Exception.hpp"
-#include <boost/throw_exception.hpp>
 #include <glog/logging.h>
 #include <algorithm>
-#include <array>
-#include <functional>
 #include <iterator>
-#include <sstream>
-#include <string>
-#include <vector>
 
 using namespace bets42::deepthgt;
 
-namespace {
-
-    const char* const TCP_SOCKET_ENTRY("Creating TCPSocket");
-    const char* const TCP_SOCKET_EXIT("Destroying TCPSocket");
+namespace 
+{
     const char* const COMMAND_HANDLER_ENTRY("Creating CommandHandler");
     const char* const COMMAND_HANDLER_EXIT("Destroying CommandHandler");
-    
-    template <std::size_t N>
-    class TCPSocketReadCompleteCallback
-    {
-        public:
-            explicit TCPSocketReadCompleteCallback(std::array<char, N>& buffer)
-                : buffer_(buffer) {}
-
-            std::size_t operator()(const boost::system::error_code& error, 
-                                   const std::size_t bytes_transferred) const
-            {
-                return !(error || buffer_[bytes_transferred] == '\r');
-            }
-
-        private:
-            std::array<char, N>& buffer_; 
-    };
-             
-} //namespace annonymous
-
-/**
- * TCPSocket
- */
-detail::TCPSocket::TCPSocket(const unsigned short port, 
-                             TCPSocketCallback& callback)
-    : entryExit_(TCP_SOCKET_ENTRY, TCP_SOCKET_EXIT),
-      acceptor_(service_, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port)),
-      socket_(service_),
-      thread_(&TCPSocket::listen, this),
-      callback_(callback) {}
-
-detail::TCPSocket::~TCPSocket() 
-{
-    boost::system::error_code error;
-    acceptor_.close(error);
-    if(error) {
-        LOG(WARNING) << "Error whilst closing TCP socket; error=" << error.message();
-    }
-
-    thread_.join();
 }
 
-void detail::TCPSocket::listen()
+/* -- Command -- */
+
+detail::Command::Command(const std::string& name, 
+                         const boost::program_options::options_description& options, 
+                         const std::vector<std::string>& args)
+    : name_(name)
 {
-    LOG(INFO) << "Listening on port " << acceptor_.local_endpoint().port();
+    boost::program_options::store(boost::program_options::command_line_parser(args).options(options).run(), args_);
+    boost::program_options::notify(args_);
+}
 
-    const std::size_t BUF_LEN = 1024; //look to make use of constexpr when supported
-    std::array<char, BUF_LEN> buffer;
 
-    do
+/* -- CommandRegistrar -- */
+
+detail::CommandRegistrar::CommandRegistrar(CommandHandler& handler)
+    : handler_(handler) {}
+
+bool detail::CommandRegistrar::registerCommand(const std::string& component,
+                                               const std::string& command,
+                                               const boost::program_options::options_description& options,
+                                               CommandCallback& callback)
+{
+    std::lock_guard<std::mutex> lock(handler_.registryMutex_);
+
+    auto componentIter(handler_.registry_.find(component));
+    if(componentIter == std::end(handler_.registry_))
     {
-        boost::system::error_code error;
-        acceptor_.accept(socket_, error);
+        componentIter = handler_.registry_.emplace(component, typename CommandHandler::CommandRegistry::mapped_type()).first;
+    }
 
-        if(acceptor_.is_open())
+    const CommandHandler::RegistryValue value { options, callback };
+    const auto commandIter(componentIter->second.emplace(component, value));
+
+    if(commandIter.second)
+    {
+        LOG(INFO) 
+            << "Inserted component '" 
+            << component << "' and command '" << command << "'";
+    }
+    else
+    {
+        LOG(WARNING) 
+            << "Can't insert duplicate, component '" 
+            << component << "' and command '" << command << "'";
+    }
+
+    return commandIter.second;
+}
+
+
+/* -- CommandRegistrar -- */
+
+CommandHandler::CommandHandler(const unsigned short port)
+    : entryExit_(COMMAND_HANDLER_ENTRY, COMMAND_HANDLER_EXIT)
+    , socket_(port, *this)
+    , registrar_(*this) {}
+
+std::string CommandHandler::onMessage(const std::string& msg)
+{
+    std::string response;
+
+    //split msg into tokens
+    std::vector<std::string> tokens;
+    std::istringstream stream(msg);
+    std::copy(
+            std::istream_iterator<std::string>(stream),
+            std::istream_iterator<std::string>(), 
+            std::back_inserter<std::vector<std::string>>(tokens));
+
+    //component and command are minimum requirement for a command msg
+    if(tokens.size() < 2)
+    {
+        response = "Invalid command, must provide both component and command: " + msg;
+    }
+    else
+    {
+        //extract component and command then remove from token set
+        const std::string component(tokens[0]);
+        const std::string command(tokens[1]);
+        tokens.erase(tokens.begin(), tokens.begin()+1);
+
+        std::lock_guard<std::mutex> lock(registryMutex_);
+
+        //lookup set of commands for module
+        const auto componentIter(registry_.find(component));
+        if(componentIter == std::end(registry_))
         {
-            if(!error)
-            {                       
-                boost::asio::read(socket_,
-                                  boost::asio::mutable_buffers_1(buffer.data(), buffer.size()),
-                                  TCPSocketReadCompleteCallback<BUF_LEN>(buffer),
-                                  error);
-
-                callback_.onMessage(std::string(buffer.data(), buffer.size()));
+            response = "Unrecognised component: " + msg;
+        }
+        else
+        {
+            //find command options (for parsing args) and callback
+            const auto commandIter(componentIter->second.find(command));
+            if(commandIter == std::end(componentIter->second))
+            {
+                response = "Unrecognised command: " + msg;
             }
             else
             {
-                LOG(WARNING) << "An error occured while trying to accept a client connection; error=" 
-                             << error.message();
+                //callback with cmd then return response to socket
+                const Command cmd(command, commandIter->second.options, tokens);
+                response = commandIter->second.callback.onCommand(cmd);
             }
         }
     }
-    while(acceptor_.is_open());
 
-    LOG(INFO) << "Finished listening on port " << acceptor_.local_endpoint().port();
-}
-
-/**
- * CommandHandler
- */
-CommandHandler::CommandHandler(const unsigned short port)
-    : entryExit_(COMMAND_HANDLER_ENTRY, COMMAND_HANDLER_EXIT),
-      socket_(port, *this) {}
-
-CommandHandler::~CommandHandler() {}
-
-bool CommandHandler::registerCommand(const Command& command)
-{
-    return cmdMap_.insert(CommandMap::value_type(command.command, command)).second;
-}
-
-void CommandHandler::onMessage(const std::string& msg)
-{
-    std::vector<std::string> tokens;
-    std::istringstream stream(msg);
-    std::copy(std::istream_iterator<std::string>(stream),
-              std::istream_iterator<std::string>(), 
-              std::back_inserter<std::vector<std::string>>(tokens));  
-
-    const auto iter(cmdMap_.find(tokens.front()));
-
-    if(iter != std::end(cmdMap_))
-    {
-        namespace prog_opts = boost::program_options;
-
-        prog_opts::variables_map varsMap;
-        try
-        {
-           // prog_opts::store(prog_opts::parse_command_line(tokens.size(), cmdTokens.data(), iter->second.options), varsMap);
-            //prog_opts::notify(varsMap);
-        }
-        catch(const prog_opts::error& e)
-        {
-            //TODO:
-        }   
-    }
+    return response;
 }
 

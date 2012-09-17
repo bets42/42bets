@@ -2,7 +2,10 @@
 
 using namespace bets42::deepthgt;
 
-const std::string& TickCaptureAlgo::registrar_key()
+TickCaptureAlgo::TickCaptureAlgo(CommandHandler::Registrar& cmdRegistrar) {}
+TickCaptureAlgo::~TickCaptureAlgo() {}
+
+const std::string& TickCaptureAlgo::name()
 {
     static const std::string key("tick_capture");
     return key;
