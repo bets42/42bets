@@ -3,7 +3,7 @@ namespace
     const char* const TRADING_ENGINE_IMPL_ENTRY("Creating TradingEngineImpl");
     const char* const TRADING_ENGINE_IMPL_EXIT("Destroying TradingEngineImpl");
 
-    const char* const COMPONENT_NAME("engine");
+    const char* const COMPONENT("engine");
 }
 
 namespace bets42 { namespace deepthgt {
@@ -16,10 +16,21 @@ namespace bets42 { namespace deepthgt {
         , algo_(cmdHandler_.registrar()) 
     {
         {
-          //  boost::program_options::options_description options("help");
-          //  cmdHandler_.registrar().registerCommand("engine", "help", options, *this);
-            //cmdHandler_.registrar().registerCommand("engine", "help", options, *this);
-        }   
+            const std::string cmd("help");
+            boost::program_options::options_description options(cmd);
+            cmdHandler_.registrar().registerCommand(COMPONENT, cmd, options, *this);
+        }
+        {
+            const std::string cmd("get_log_level");
+            boost::program_options::options_description options(cmd);
+            cmdHandler_.registrar().registerCommand(COMPONENT, cmd, options, *this);
+        }
+        {
+            const std::string cmd("set_log_level");
+            boost::program_options::options_description options(cmd);
+            options.add_options()("level", boost::program_options::value<std::string>(), "Log level threshold");
+            cmdHandler_.registrar().registerCommand(COMPONENT, cmd, options, *this);
+        }
     }
 
     template <typename TAlgo>
@@ -28,7 +39,7 @@ namespace bets42 { namespace deepthgt {
     template <typename TAlgo>
     std::string TradingEngineImpl<TAlgo>::onCommand(const CommandHandler::Command& command) 
     {
-        return "not_implemented";
+        return cmdHandler_.usage(COMPONENT);
     }
 
     template <typename TAlgo>

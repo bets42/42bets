@@ -1,5 +1,6 @@
 #include "bets42/deepthgt/TCPSocket.hpp"
 #include <glog/logging.h>
+#include <glog/log_severity.h>
 #include <array>
 
 using namespace bets42::deepthgt;
@@ -22,7 +23,7 @@ TCPSocket::~TCPSocket()
     acceptor_.close(error);
     if(error) 
     {
-        LOG(WARNING) << "Error whilst closing TCP socket; error=" << error.message();
+        LOG(ERROR) << "Error whilst closing TCP socket; error=" << error.message();
     }
 
     thread_.join();
@@ -45,11 +46,11 @@ void TCPSocket::listen()
         {
             if(error != boost::asio::error::bad_descriptor)
             {
-                LOG(CRIT) 
+                LOG(ERROR) 
                     << "An error occured while trying to accept a client connection; error=" 
                     << error.message();
 
-                sleep(1); //don't want to flood warnings
+                sleep(1); //don't want to flood logs
             }
         }
         else
@@ -67,24 +68,20 @@ void TCPSocket::listen()
 
                 const std::string response(callback_.onMessage(msg));
 
-                LOG(INFO) << "Sending reponse: " << response;
-
                 boost::asio::write(socket, boost::asio::buffer(response), error);
 
                 if(error)
                 {
-                    if(error == boost::asio::error::broken_pipe)
+                    if(error != boost::asio::error::broken_pipe)
                     {
-                        LOG(INFO) << "Client disconnected";
-                    }
-                    else if(error)
-                    {
-                        LOG(CRIT) << "Error whilst writing response, closing client connection: " << error.message();
+                        LOG(ERROR) 
+                            << "Error whilst writing response, closing client connection: " 
+                            << error.message();
                     }
 
                     socket.close();
 
-                    sleep(1); //don't want to flood warnings
+                    sleep(1); //don't want to flood logs
                 }
             }
         }

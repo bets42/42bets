@@ -35,16 +35,10 @@ bool detail::CommandRegistrar::registerCommand(const std::string& component,
 {
     std::lock_guard<std::mutex> lock(handler_.registryMutex_);
 
-    auto componentIter(handler_.registry_.find(component));
-    if(componentIter == std::end(handler_.registry_))
-    {
-        componentIter = handler_.registry_.emplace(component, typename CommandHandler::CommandRegistry::mapped_type()).first;
-    }
-
     const CommandHandler::RegistryValue value { options, callback };
-    const auto commandIter(componentIter->second.emplace(component, value));
+    const auto result(handler_.registry_[component].emplace(command,  value));
 
-    if(commandIter.second)
+    if(result.second)
     {
         LOG(INFO) 
             << "Inserted component '" 
@@ -57,7 +51,7 @@ bool detail::CommandRegistrar::registerCommand(const std::string& component,
             << component << "' and command '" << command << "'";
     }
 
-    return commandIter.second;
+    return result.second;
 }
 
 
@@ -80,25 +74,25 @@ std::string CommandHandler::onMessage(const std::string& msg)
             std::istream_iterator<std::string>(), 
             std::back_inserter<std::vector<std::string>>(tokens));
 
-    //component and command are minimum requirement for a command msg
-    if(tokens.size() < 2)
+    //process request - only send usage() when asked, otherwise it's an error
+    if(tokens.size() == 1 && tokens[0] == "help")
     {
-        response = "Invalid command, must provide both component and command: " + msg;
+        response = usage();
     }
-    else
+    else if(tokens.size() > 1)
     {
         //extract component and command then remove from token set
         const std::string component(tokens[0]);
         const std::string command(tokens[1]);
         tokens.erase(tokens.begin(), tokens.begin()+1);
-
+     
         std::lock_guard<std::mutex> lock(registryMutex_);
 
         //lookup set of commands for module
         const auto componentIter(registry_.find(component));
         if(componentIter == std::end(registry_))
         {
-            response = "Unrecognised component: " + msg;
+            response = "Unrecognised component, see deepthgt_cmd.py help";
         }
         else
         {
@@ -106,7 +100,7 @@ std::string CommandHandler::onMessage(const std::string& msg)
             const auto commandIter(componentIter->second.find(command));
             if(commandIter == std::end(componentIter->second))
             {
-                response = "Unrecognised command: " + msg;
+                response = "Unrecognised command, see deepthgt_cmd.py help";
             }
             else
             {
@@ -114,9 +108,59 @@ std::string CommandHandler::onMessage(const std::string& msg)
                 const Command cmd(command, commandIter->second.options, tokens);
                 response = commandIter->second.callback.onCommand(cmd);
             }
-        }
+        }   
+    }
+    else
+    {
+        response = "Invalid request, see deepthgt_cmd.py help";
     }
 
     return response;
+}
+
+std::string CommandHandler::usage() const
+{
+    std::stringstream stream;
+    stream << usageImpl() << '\n';
+    return stream.str();
+}
+
+std::string CommandHandler::usage(const std::string& component) const
+{
+    std::stringstream stream;
+    stream << usageImpl(component) << '\n';
+    return stream.str();
+}
+
+boost::program_options::options_description CommandHandler::usageImpl() const
+{
+    boost::program_options::options_description usage(
+        "DeepThought Command Usage - deepthgt_cmd.py help | <component> <command> [options...]\n"
+        "====================================================================================");
+
+    for(const auto& component : registry_)
+    {
+        usage.add(usageImpl(component.first));
+    }
+
+    return usage;
+}
+
+boost::program_options::options_description CommandHandler::usageImpl(const std::string& component) const
+{
+    boost::program_options::options_description usage(
+        component + " Usage - deepthgt_cmd.py " + component + " <command> [options...]\n"
+        "------------------------------------------------------------------------------------");
+
+    const auto iter(registry_.find(component));
+    if(iter != std::end(registry_))
+    {
+        for(const auto& command : iter->second)
+        {
+            usage.add(command.second.options);   
+        }
+    }
+
+    return usage;
 }
 

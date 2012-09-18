@@ -69,6 +69,13 @@ namespace bets42 { namespace deepthgt {
 
             Registrar& registrar() { return registrar_; }
 
+            std::string usage() const;
+            std::string usage(const std::string& component) const;
+
+        private:
+            boost::program_options::options_description usageImpl() const;
+            boost::program_options::options_description usageImpl(const std::string& component) const;
+
         private:
             struct RegistryValue { boost::program_options::options_description options; Callback& callback; };
             typedef std::map<std::string, std::map<std::string, RegistryValue>> CommandRegistry;
