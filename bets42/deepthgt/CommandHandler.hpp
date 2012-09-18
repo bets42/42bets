@@ -87,6 +87,6 @@ namespace bets42 { namespace deepthgt {
             friend class detail::CommandRegistrar;
     };
 
-}} //namespace bets42::deepthgt
+}}
 
 #endif //BETS42_DEEPTHGT_COMMAND_HANDLER_HPP

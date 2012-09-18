@@ -9,9 +9,7 @@ namespace bets42 { namespace deepthgt {
 
     struct TradingEngine
     {
-        TradingEngine() {}
         virtual ~TradingEngine() {}
-
         virtual void run() = 0;
     };
 
