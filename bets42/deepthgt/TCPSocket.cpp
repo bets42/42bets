@@ -32,27 +32,32 @@ void TCPSocket::listen()
 {  
     const auto port(acceptor_.local_endpoint().port());
 
-    for(;;)
+    while(acceptor_.is_open())
     {
         boost::system::error_code error;
 
         LOG(INFO) << "Listening on port " << port;
 
-        boost::asio::ip::tcp::socket socket_(service_);
-        acceptor_.accept(socket_, error);
+        boost::asio::ip::tcp::socket socket(service_);
+        acceptor_.accept(socket, error);
 
         if(error)
         {
-            LOG(WARNING) 
-                << "An error occured while trying to accept a client connection; error=" 
-                << error.message();
+            if(error != boost::asio::error::bad_descriptor)
+            {
+                LOG(CRIT) 
+                    << "An error occured while trying to accept a client connection; error=" 
+                    << error.message();
+
+                sleep(1); //don't want to flood warnings
+            }
         }
         else
         {
-            while(acceptor_.is_open())
+            while(socket.is_open())
             {
                 boost::asio::streambuf stream;
-                boost::asio::read_until(socket_, stream, '\n', error);
+                boost::asio::read_until(socket, stream, '\n', error);
 
                 const std::string msg(
                     (std::istreambuf_iterator<char>(&stream)), 
@@ -60,13 +65,12 @@ void TCPSocket::listen()
 
                 LOG(INFO) << "Received message: " << msg;
 
-                const std::string response("hello)back");//callback_.onMessage(msg));
+                const std::string response(callback_.onMessage(msg));
 
                 LOG(INFO) << "Sending reponse: " << response;
 
-                boost::asio::write(socket_, boost::asio::buffer(response), error);
+                boost::asio::write(socket, boost::asio::buffer(response), error);
 
-                //TODO: this recovery mechanism isn't complete
                 if(error)
                 {
                     if(error == boost::asio::error::broken_pipe)
@@ -75,10 +79,12 @@ void TCPSocket::listen()
                     }
                     else if(error)
                     {
-                        LOG(WARNING) << "Error whilst writing response, closing client connection: " << error.message();
+                        LOG(CRIT) << "Error whilst writing response, closing client connection: " << error.message();
                     }
 
-                    acceptor_.close();
+                    socket.close();
+
+                    sleep(1); //don't want to flood warnings
                 }
             }
         }
