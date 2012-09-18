@@ -23,7 +23,7 @@ HDRS = 	arthur/entry_exit.hpp \
 SRCS = 	Main.cpp \
 		deepthgt/CommandHandler.cpp \
 		deepthgt/TCPSocket.cpp \
-		deepthgt/TickCaptureAlgo.cpp
+		earth/TickCaptureAlgo.cpp
 
 all: $(SRCS) $(LIBRARY)
 
