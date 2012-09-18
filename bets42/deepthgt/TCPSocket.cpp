@@ -7,8 +7,8 @@ using namespace bets42::deepthgt;
 
 namespace 
 {
-    const char* const TCP_SOCKET_ENTRY("Creating TCPSocket");
-    const char* const TCP_SOCKET_EXIT("Destroying TCPSocket");     
+    constexpr char* TCP_SOCKET_ENTRY("Creating TCPSocket");
+    constexpr char* TCP_SOCKET_EXIT("Destroying TCPSocket");     
 }
 
 TCPSocket::TCPSocket(const unsigned short port, TCPSocket::Callback& callback)

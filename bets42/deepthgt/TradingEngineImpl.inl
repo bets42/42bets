@@ -1,9 +1,9 @@
 namespace 
 {
-    const char* const TRADING_ENGINE_IMPL_ENTRY("Creating TradingEngineImpl");
-    const char* const TRADING_ENGINE_IMPL_EXIT("Destroying TradingEngineImpl");
+    constexpr char* TRADING_ENGINE_IMPL_ENTRY("Creating TradingEngineImpl");
+    constexpr char* TRADING_ENGINE_IMPL_EXIT("Destroying TradingEngineImpl");
 
-    const char* const COMPONENT("engine");
+    constexpr char* COMPONENT("engine");
 }
 
 namespace bets42 { namespace deepthgt {
@@ -16,20 +16,17 @@ namespace bets42 { namespace deepthgt {
         , algo_(cmdHandler_.registrar()) 
     {
         {
-            const std::string cmd("help");
-            boost::program_options::options_description options(cmd);
-            cmdHandler_.registrar().registerCommand(COMPONENT, cmd, options, *this);
+            boost::program_options::options_description options("[help]\nGet help information");
+            cmdHandler_.registrar().registerCommand(COMPONENT, "help", options, *this);
         }
         {
-            const std::string cmd("get_log_level");
-            boost::program_options::options_description options(cmd);
-            cmdHandler_.registrar().registerCommand(COMPONENT, cmd, options, *this);
+            boost::program_options::options_description options("[get_log_level]\nGet log level threshold");
+            cmdHandler_.registrar().registerCommand(COMPONENT, "get_log_level", options, *this);
         }
         {
-            const std::string cmd("set_log_level");
-            boost::program_options::options_description options(cmd);
+            boost::program_options::options_description options("[set_log_level]\nSet log level threshold");
             options.add_options()("level", boost::program_options::value<std::string>(), "Log level threshold");
-            cmdHandler_.registrar().registerCommand(COMPONENT, cmd, options, *this);
+            cmdHandler_.registrar().registerCommand(COMPONENT, "set_log_level", options, *this);
         }
     }
 

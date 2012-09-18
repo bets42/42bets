@@ -1,4 +1,5 @@
 #include "bets42/deepthgt/CommandHandler.hpp"
+#include <boost/algorithm/string/case_conv.hpp>
 #include <glog/logging.h>
 #include <algorithm>
 #include <iterator>
@@ -92,7 +93,7 @@ std::string CommandHandler::onMessage(const std::string& msg)
         const auto componentIter(registry_.find(component));
         if(componentIter == std::end(registry_))
         {
-            response = "Unrecognised component, see deepthgt_cmd.py help";
+            response = "Unrecognised component, see help command";
         }
         else
         {
@@ -100,7 +101,7 @@ std::string CommandHandler::onMessage(const std::string& msg)
             const auto commandIter(componentIter->second.find(command));
             if(commandIter == std::end(componentIter->second))
             {
-                response = "Unrecognised command, see deepthgt_cmd.py help";
+                response = "Unrecognised command, see help command";
             }
             else
             {
@@ -112,7 +113,7 @@ std::string CommandHandler::onMessage(const std::string& msg)
     }
     else
     {
-        response = "Invalid request, see deepthgt_cmd.py help";
+        response = "Invalid request, see help command";
     }
 
     return response;
@@ -135,8 +136,11 @@ std::string CommandHandler::usage(const std::string& component) const
 boost::program_options::options_description CommandHandler::usageImpl() const
 {
     boost::program_options::options_description usage(
-        "DeepThought Command Usage - deepthgt_cmd.py help | <component> <command> [options...]\n"
-        "====================================================================================");
+        "The DeepThought framework is structured as a set of modules, each of\n"
+        "which can be independently administared via the set of commands it makes\n"
+        "available. To invoke a command the following form should be used:\n\n"
+        "   <component> <command> [options...]\n\n"
+        "Following is a list of the available commands, split by component");
 
     for(const auto& component : registry_)
     {
@@ -148,9 +152,8 @@ boost::program_options::options_description CommandHandler::usageImpl() const
 
 boost::program_options::options_description CommandHandler::usageImpl(const std::string& component) const
 {
-    boost::program_options::options_description usage(
-        component + " Usage - deepthgt_cmd.py " + component + " <command> [options...]\n"
-        "------------------------------------------------------------------------------------");
+    const std::string usageStr("\n" + component + " COMMANDS");
+    boost::program_options::options_description usage(boost::to_upper_copy(usageStr));
 
     const auto iter(registry_.find(component));
     if(iter != std::end(registry_))

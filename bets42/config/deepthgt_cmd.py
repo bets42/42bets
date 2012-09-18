@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Script for sending command to a deepthought server
+Script for sending a command to a deepthought server
 """
 
 import optparse
@@ -54,10 +54,10 @@ def main():
             with TCPCommandSender(options.host, options.port) as cmd_sender:
                 sys.stdout.write(cmd_sender.send(options.command + '\n'))
         except EnvironmentError, msg:
-            sys.stderr.write("Failed to connect to server %s:%s; reason=%s" % (options.host, options.port, msg))
+            sys.stderr.write("Failed to connect to %s:%s; reason=%s" % (options.host, options.port, msg))
             sys.exit(1)
     else:
-        parser.error("Incorrect number/set of arguments provided, see --help")  
+        sys.stderr.write(str(parser.print_help()))
 
 if __name__ == "__main__":
     main()
