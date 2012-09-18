@@ -10,8 +10,7 @@
 namespace bets42 { namespace deepthgt {
 
     template <typename TAlgo>
-    class TradingEngineImpl : public TradingEngine,
-                              public CommandHandler::Callback
+    class TradingEngineImpl : public TradingEngine
     {
         public:
             TradingEngineImpl(const std::vector<std::string>& exchanges,
@@ -22,7 +21,9 @@ namespace bets42 { namespace deepthgt {
             static const std::string& registrant_key() { return TAlgo::name(); }
 
             /* commands */
-            std::string onCommand(const CommandHandler::Command& command);
+            std::string onGetLogLevel(const CommandHandler::Command& command);
+            std::string onSetLogLevel(const CommandHandler::Command& command);
+            std::string onHelp(const CommandHandler::Command& command);
 
             /* engine thread */
             void run();
@@ -34,7 +35,7 @@ namespace bets42 { namespace deepthgt {
     };
     
     template <typename TAlgo>
-    using TradingEngineFactoryRegistrant = TradingEngineFactory::registrant<TradingEngineImpl<TAlgo>>;
+    using TradingEngineFactory_AlgoRegistrant = TradingEngineFactory::registrant<TradingEngineImpl<TAlgo>>;
 }}
 
 #include "bets42/deepthgt/TradingEngineImpl.inl"

@@ -6,7 +6,7 @@
 namespace bets42 { namespace deepthgt {
 
     template <typename TDerived>
-    struct Algo : private TradingEngineFactoryRegistrant<TDerived>
+    struct Algo : private TradingEngineFactory_AlgoRegistrant<TDerived>
     {
         virtual ~Algo() {}
     };

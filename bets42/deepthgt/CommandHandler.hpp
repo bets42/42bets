@@ -5,6 +5,7 @@
 #include "bets42/deepthgt/TCPSocket.hpp"
 #include <boost/program_options.hpp>
 #include <boost/utility.hpp>
+#include <functional>
 #include <map>
 #include <mutex>
 #include <string>
@@ -31,11 +32,7 @@ namespace bets42 { namespace deepthgt {
                 boost::program_options::variables_map   args_;
         };
 
-        struct CommandCallback
-        {
-            virtual ~CommandCallback() {}
-            virtual std::string onCommand(const Command& command) = 0;
-        };
+        typedef std::function<std::string(const Command&)> CommandCallback;
 
         class CommandRegistrar
         {
@@ -46,7 +43,7 @@ namespace bets42 { namespace deepthgt {
                     const std::string& component,
                     const std::string& command,
                     const boost::program_options::options_description& options,
-                    CommandCallback& callback);
+                    CommandCallback callback);
 
             private:
                 CommandHandler& handler_;
@@ -77,7 +74,7 @@ namespace bets42 { namespace deepthgt {
             boost::program_options::options_description usageImpl(const std::string& component) const;
 
         private:
-            struct RegistryValue { boost::program_options::options_description options; Callback& callback; };
+            struct RegistryValue { boost::program_options::options_description options; Callback callback; };
             typedef std::map<std::string, std::map<std::string, RegistryValue>> CommandRegistry;
 
             arthur::entry_exit          entryExit_;
@@ -85,7 +82,7 @@ namespace bets42 { namespace deepthgt {
             CommandRegistry             registry_;
             detail::CommandRegistrar    registrar_;
 
-            mutable std::mutex  registryMutex_;
+            mutable std::mutex          registryMutex_;
 
             friend class detail::CommandRegistrar;
     };

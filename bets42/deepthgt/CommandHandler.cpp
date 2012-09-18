@@ -32,12 +32,12 @@ detail::CommandRegistrar::CommandRegistrar(CommandHandler& handler)
 bool detail::CommandRegistrar::registerCommand(const std::string& component,
                                                const std::string& command,
                                                const boost::program_options::options_description& options,
-                                               CommandCallback& callback)
+                                               CommandCallback callback)
 {
     std::lock_guard<std::mutex> lock(handler_.registryMutex_);
 
     const CommandHandler::RegistryValue value { options, callback };
-    const auto result(handler_.registry_[component].emplace(command,  value));
+    const auto result(handler_.registry_[component].emplace(command, value));
 
     if(result.second)
     {
@@ -107,7 +107,7 @@ std::string CommandHandler::onMessage(const std::string& msg)
             {
                 //callback with cmd then return response to socket
                 const Command cmd(command, commandIter->second.options, tokens);
-                response = commandIter->second.callback.onCommand(cmd);
+                response = commandIter->second.callback(cmd);
             }
         }   
     }
