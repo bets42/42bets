@@ -13,11 +13,15 @@ namespace
 TCPSocket::TCPSocket(const unsigned short port, TCPSocket::Callback& callback)
     : entryExit_(TCP_SOCKET_ENTRY, TCP_SOCKET_EXIT)
     , acceptor_(service_, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port))
+    , doListen_(true)
     , thread_(&TCPSocket::listen, this)
     , callback_(callback) {}
 
 TCPSocket::~TCPSocket()
 {
+    doListen_ = false;
+
+    //TODO: this doesn't clean up properly
     boost::system::error_code error;
     acceptor_.close(error);
     if(error) 
@@ -30,16 +34,13 @@ TCPSocket::~TCPSocket()
 
 void TCPSocket::listen()
 {  
-    const auto port(acceptor_.local_endpoint().port());
-
-    for(;;)
+    while(doListen_)
     {
+        LOG(INFO) << "Listening on port " << acceptor_.local_endpoint().port();
+
         boost::system::error_code error;
-
-        LOG(INFO) << "Listening on port " << port;
-
-        boost::asio::ip::tcp::socket socket_(service_);
-        acceptor_.accept(socket_, error);
+        boost::asio::ip::tcp::socket socket(service_);
+        acceptor_.accept(socket, error);
 
         if(error)
         {
@@ -52,7 +53,7 @@ void TCPSocket::listen()
             while(acceptor_.is_open())
             {
                 boost::asio::streambuf stream;
-                boost::asio::read_until(socket_, stream, '\n', error);
+                boost::asio::read_until(socket, stream, '\n', error);
 
                 const std::string msg(
                     (std::istreambuf_iterator<char>(&stream)), 
@@ -60,29 +61,21 @@ void TCPSocket::listen()
 
                 LOG(INFO) << "Received message: " << msg;
 
-                const std::string response("hello)back");//callback_.onMessage(msg));
+                const std::string response(callback_.onMessage(msg));
 
                 LOG(INFO) << "Sending reponse: " << response;
 
-                boost::asio::write(socket_, boost::asio::buffer(response), error);
+                boost::asio::write(socket, boost::asio::buffer(response), error);
 
-                //TODO: this recovery mechanism isn't complete
                 if(error)
                 {
-                    if(error == boost::asio::error::broken_pipe)
-                    {
-                        LOG(INFO) << "Client disconnected";
-                    }
-                    else if(error)
-                    {
-                        LOG(WARNING) << "Error whilst writing response, closing client connection: " << error.message();
-                    }
-
+                    //TODO: this recovery mechanism doesn't work
+                    LOG(WARNING) << "Error whilst writing response, closing client connection: " << error.message();
                     acceptor_.close();
                 }
             }
         }
 
-        LOG(INFO) << "Closed client connection on port " << port; 
+        LOG(INFO) << "Closed client connection on port " << acceptor_.local_endpoint().port(); 
     }
 }          

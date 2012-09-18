@@ -37,9 +37,7 @@ namespace bets42 { namespace deepthgt {
 
             boost::asio::io_service         service_;
             boost::asio::ip::tcp::acceptor  acceptor_;
-            boost::asio::ip::tcp::socket    socket_;
-            
-            bool                            doListen_;
+ //           boost::asio::ip::tcp::socket    socket_;
 
             std::thread                     thread_;
             Callback&                       callback_;

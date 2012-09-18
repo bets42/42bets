@@ -16,10 +16,10 @@ namespace bets42 { namespace deepthgt {
         , algo_(cmdHandler_.registrar()) 
     {
         {
-            boost::program_options::options_description options("help");
-            cmdHandler_.registrar().registerCommand("engine", "help", options, *this);
-            cmdHandler_.registrar().registerCommand("engine", "help", options, *this);
-        }
+          //  boost::program_options::options_description options("help");
+          //  cmdHandler_.registrar().registerCommand("engine", "help", options, *this);
+            //cmdHandler_.registrar().registerCommand("engine", "help", options, *this);
+        }   
     }
 
     template <typename TAlgo>
