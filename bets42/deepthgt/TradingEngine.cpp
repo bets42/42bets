@@ -88,31 +88,37 @@ std::string TradingEngine::onSetLogLevel(const CommandHandler::Command& command)
 {
     std::lock_guard<std::mutex> lock(cmdMutex_);
 
-    static const std::map<std::string, decltype(FLAGS_minloglevel)> logLevels {
+    static const std::map<std::string, decltype(FLAGS_minloglevel)> logLevels 
+    {
         { "INFO", google::INFO },
         { "WARN", google::WARNING },
         { "ERROR", google::ERROR }
     };
 
-    const auto level(command.args()["level"].as<std::string>());
-    const auto iter(logLevels.find(level));
-
     std::stringstream response;
 
-    if(iter == std::end(logLevels))
+    if(command.args().count("level"))
+    {
+        const auto level(command.args()["level"].as<std::string>());
+        const auto iter(logLevels.find(level));
+
+        if(iter != std::end(logLevels))
+        {
+            const auto prevLogLevel(FLAGS_minloglevel);
+            FLAGS_minloglevel = iter->second;
+
+            response 
+                << "Changed log level from " 
+                << google::GetLogSeverityName(prevLogLevel) << " to "
+                << google::GetLogSeverityName(FLAGS_minloglevel);
+
+            LOG(INFO) << response.str(); 
+        }
+    }
+
+    if(response.str().empty())
     {
         response << command.options();
-    }
-    else
-    {
-        const auto prevLogLevel(FLAGS_minloglevel);
-        FLAGS_minloglevel = iter->second;
-
-        response << "Changed log level from " 
-                 << google::GetLogSeverityName(prevLogLevel) << " to "
-                 << google::GetLogSeverityName(FLAGS_minloglevel);
-
-        LOG(INFO) << response.str();
     }
 
     return response.str();
@@ -160,8 +166,10 @@ void TradingEngine::run()
         std::addressof(cmdHandler_)));
                                  
     //wait for shutdown signal
-    std::unique_lock<std::mutex> lock(shutdownConditionMutex_);
-    shutdownCondition_.wait(lock);
+    {
+        std::unique_lock<std::mutex> lock(shutdownConditionMutex_);
+        shutdownCondition_.wait(lock);
+    }
 
     //join threads
     cmdHandler_.stop();
