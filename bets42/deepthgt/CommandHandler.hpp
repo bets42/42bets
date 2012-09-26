@@ -1,8 +1,8 @@
 #ifndef BETS42_DEEPTHGT_COMMAND_HANDLER_HPP
 #define BETS42_DEEPTHGT_COMMAND_HANDLER_HPP
 
-#include "bets42/arthur/entry_exit.hpp"
 #include "bets42/deepthgt/TCPSocket.hpp"
+#include <bets42/arthur/entry_exit.hpp>
 #include <boost/program_options.hpp>
 #include <boost/utility.hpp>
 #include <functional>
@@ -25,14 +25,16 @@ namespace bets42 { namespace deepthgt {
                         const std::vector<std::string>& args);
 
                 const std::string& name() const { return name_; }
+                const boost::program_options::options_description options() const { return options_; }
                 const boost::program_options::variables_map args() const { return args_; }
 
             private:
-                const std::string                       name_;
-                boost::program_options::variables_map   args_;
+                const std::string                                   name_;
+                const boost::program_options::options_description   options_;
+                boost::program_options::variables_map               args_;
         };
 
-        typedef std::function<std::string(const Command&)> CommandCallback;
+        typedef std::function<std::string(const Command&)>  CommandCallback;
 
         class CommandRegistrar
         {
@@ -50,9 +52,7 @@ namespace bets42 { namespace deepthgt {
         };
     }
 
-
-    class CommandHandler : public TCPSocket::Callback,
-                           private boost::noncopyable
+    class CommandHandler : private boost::noncopyable
     {
         public:
             typedef detail::Command             Command;
@@ -61,15 +61,21 @@ namespace bets42 { namespace deepthgt {
 
         public:
             explicit CommandHandler(const unsigned short port);
-
-            std::string onMessage(const std::string& msg);
+            ~CommandHandler();
 
             Registrar& registrar() { return registrar_; }
 
             std::string usage() const;
             std::string usage(const std::string& component) const;
 
+            //threading
+            void run();
+            void stop();
+
         private:
+            //socket handler
+            std::string onSocketMessage(const std::string& msg);
+
             boost::program_options::options_description usageImpl() const;
             boost::program_options::options_description usageImpl(const std::string& component) const;
 
@@ -84,7 +90,8 @@ namespace bets42 { namespace deepthgt {
 
             mutable std::mutex          registryMutex_;
 
-            friend class detail::CommandRegistrar;
+            friend class TCPSocket; //socket callbacks
+            friend class detail::CommandRegistrar; //access to registry
     };
 
 }}

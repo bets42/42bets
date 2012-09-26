@@ -1,16 +1,11 @@
-#include "bets42/deepthgt/CommandHandler.hpp"
+#include <bets42/deepthgt/CommandHandler.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
 #include <glog/logging.h>
 #include <algorithm>
+#include <functional>
 #include <iterator>
 
 using namespace bets42::deepthgt;
-
-namespace 
-{
-    const char* const COMMAND_HANDLER_ENTRY("Creating CommandHandler");
-    const char* const COMMAND_HANDLER_EXIT("Destroying CommandHandler");
-}
 
 /* -- Command -- */
 
@@ -18,6 +13,7 @@ detail::Command::Command(const std::string& name,
                          const boost::program_options::options_description& options, 
                          const std::vector<std::string>& args)
     : name_(name)
+    , options_(options)
 {
     boost::program_options::store(boost::program_options::command_line_parser(args).options(options).run(), args_);
     boost::program_options::notify(args_);
@@ -41,15 +37,13 @@ bool detail::CommandRegistrar::registerCommand(const std::string& component,
 
     if(result.second)
     {
-        LOG(INFO) 
-            << "Inserted component '" 
-            << component << "' and command '" << command << "'";
+        LOG(INFO)
+            << "Registered command '" << command << "' for component '" << component << "'";
     }
     else
     {
         LOG(WARNING) 
-            << "Can't insert duplicate, component '" 
-            << component << "' and command '" << command << "'";
+            << "Can't register command '" << command << "' for component '" << component << "', duplicate";
     }
 
     return result.second;
@@ -59,11 +53,40 @@ bool detail::CommandRegistrar::registerCommand(const std::string& component,
 /* -- CommandRegistrar -- */
 
 CommandHandler::CommandHandler(const unsigned short port)
-    : entryExit_(COMMAND_HANDLER_ENTRY, COMMAND_HANDLER_EXIT)
-    , socket_(port, *this)
+    : entryExit_("CommandHandler")
+    , socket_(port, std::bind(&CommandHandler::onSocketMessage, this, std::placeholders::_1))
     , registrar_(*this) {}
+ 
+CommandHandler::~CommandHandler() {}
 
-std::string CommandHandler::onMessage(const std::string& msg)
+std::string CommandHandler::usage() const
+{
+    std::stringstream stream;
+    stream << usageImpl() << '\n';
+    return stream.str();
+}
+
+std::string CommandHandler::usage(const std::string& component) const
+{
+    std::stringstream stream;
+    stream << usageImpl(component) << '\n';
+    return stream.str();
+}
+  
+void CommandHandler::run()
+{
+    LOG(INFO) << "Running CommandHandler";
+    socket_.listen();    
+    LOG(INFO) << "Stopped CommandHandler";
+}
+
+void CommandHandler::stop()
+{
+    LOG(INFO) << "Proceeding to stop CommandHandler";
+    socket_.stop();    
+}
+    
+std::string CommandHandler::onSocketMessage(const std::string& msg)
 {
     std::string response;
 
@@ -117,20 +140,6 @@ std::string CommandHandler::onMessage(const std::string& msg)
     }
 
     return response;
-}
-
-std::string CommandHandler::usage() const
-{
-    std::stringstream stream;
-    stream << usageImpl() << '\n';
-    return stream.str();
-}
-
-std::string CommandHandler::usage(const std::string& component) const
-{
-    std::stringstream stream;
-    stream << usageImpl(component) << '\n';
-    return stream.str();
 }
 
 boost::program_options::options_description CommandHandler::usageImpl() const

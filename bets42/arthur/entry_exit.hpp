@@ -9,19 +9,19 @@ namespace bets42 { namespace arthur {
     class entry_exit
     {
         public:
-            entry_exit(const std::string& entry_msg, const std::string& exit_msg) 
-                : exit_msg_(exit_msg)
+            entry_exit(const std::string& name) 
+                : name_(name)
             { 
-                LOG(INFO) << entry_msg; 
+                LOG(INFO) << "Entering " << name_; 
             }
 
             ~entry_exit() 
             { 
-                LOG(INFO) << exit_msg_; 
+                LOG(INFO) << "Exiting " << name_; 
             }
         
         private:
-            const std::string exit_msg_;
+            const std::string name_;
     };
 
 }}

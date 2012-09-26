@@ -1,7 +1,7 @@
 #ifndef BETS42_DEEPTHGT_EXCEPTION_HPP
 #define BETS42_DEEPTHGT_EXCEPTION_HPP
 
-#include "bets42/arthur/exception.hpp"
+#include <bets42/arthur/exception.hpp>
 #include <string>
 
 namespace bets42 { namespace deepthgt {

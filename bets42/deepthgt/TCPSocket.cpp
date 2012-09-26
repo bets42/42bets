@@ -1,33 +1,13 @@
-#include "bets42/deepthgt/TCPSocket.hpp"
+#include <bets42/deepthgt/TCPSocket.hpp>
 #include <glog/logging.h>
 #include <glog/log_severity.h>
-#include <array>
 
 using namespace bets42::deepthgt;
 
-namespace 
-{
-    constexpr char* TCP_SOCKET_ENTRY("Creating TCPSocket");
-    constexpr char* TCP_SOCKET_EXIT("Destroying TCPSocket");     
-}
-
-TCPSocket::TCPSocket(const unsigned short port, TCPSocket::Callback& callback)
-    : entryExit_(TCP_SOCKET_ENTRY, TCP_SOCKET_EXIT)
+TCPSocket::TCPSocket(const unsigned short port, TCPSocket::Callback callback)
+    : entryExit_("TCPSocket")
     , acceptor_(service_, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port))
-    , thread_(&TCPSocket::listen, this)
     , callback_(callback) {}
-
-TCPSocket::~TCPSocket()
-{
-    boost::system::error_code error;
-    acceptor_.close(error);
-    if(error) 
-    {
-        LOG(ERROR) << "Error whilst closing TCP socket; error=" << error.message();
-    }
-
-    thread_.join();
-}  
 
 void TCPSocket::listen()
 {  
@@ -66,9 +46,10 @@ void TCPSocket::listen()
 
                 LOG(INFO) << "Received message: " << msg;
 
-                const std::string response(callback_.onMessage(msg));
-
-                boost::asio::write(socket, boost::asio::buffer(response), error);
+                boost::asio::write(
+                    socket, 
+                    boost::asio::buffer(callback_(msg)), 
+                    error);
 
                 if(error)
                 {
@@ -88,4 +69,15 @@ void TCPSocket::listen()
 
         LOG(INFO) << "Closed client connection on port " << port; 
     }
-}          
+}      
+ 
+void TCPSocket::stop()
+{
+    boost::system::error_code error;
+    acceptor_.close(error);
+    if(error) 
+    {
+        LOG(ERROR) << "Error whilst stopping TCP socket; error=" << error.message();
+    }
+}
+  

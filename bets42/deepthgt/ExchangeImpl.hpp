@@ -3,11 +3,11 @@
 
 namespace bets42 { namespace deepthgt {{
 
-    template <typename TClient, typename TProtocol>
+    template <typename TAdapter>
     class ExchangeImpl : public Exchange
     {
         public:
-            ExchangeImpl(TClient& client, CommandHandler::Registrar& cmdRegistrar);
+            ExchangeImpl(CommandHandler::Registrar& cmdRegistrar);
             virtual ~ExchangeImpl();
 
         private:
