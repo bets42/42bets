@@ -171,7 +171,7 @@ void TradingEngine::run()
     for(auto& exchange : exchanges_)
     {
         exchange->stop();
-        exchangeFutures.at(offset++);
+        exchangeFutures.at(offset++).wait();
     }
 
     algo_->stop();
