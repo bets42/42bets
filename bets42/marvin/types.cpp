@@ -4,10 +4,10 @@
 
 const std::string& bets42::marvin::to_string(const bets42::marvin::exch_id value)
 {
-    switch(value)
-    {
-        TO_STRING_CASE(exch_id::betdaq,     "Betdaq")
-        TO_STRING_CASE(exch_id::betfair,    "Betfair")
-        TO_STRING_CASE(exch_id::mtgox,      "MtGox")
-    }
+	switch(value)
+	{
+			TO_STRING_CASE(exch_id::betdaq,     "Betdaq")
+			TO_STRING_CASE(exch_id::betfair,    "Betfair")
+			TO_STRING_CASE(exch_id::mtgox,      "MtGox")
+	}
 }

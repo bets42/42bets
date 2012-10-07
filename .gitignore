@@ -1,0 +1,21 @@
+# swap files
+*.swp
+*.swo
+
+# backups
+*.bck
+
+# C++ obj files
+*.o
+objs/
+
+# dependency files
+*.d
+deps/
+
+# static_cpp_code_review.cpp output files
+*.orig
+
+# binaries
+42bets
+42bets-test

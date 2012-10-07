@@ -7,32 +7,42 @@
 #include <memory>
 #include <set>
 
-namespace bets42 { namespace deepthgt {
+namespace bets42
+{
+	namespace deepthgt
+	{
 
-    class Exchange 
-    {
-        public:
-            explicit Exchange(const marvin::exch_id exchID);
-            virtual ~Exchange();
+		class Exchange
+		{
+			public:
+				explicit Exchange(const marvin::exch_id exchID);
+				virtual ~Exchange();
 
-            //general
-            marvin::exch_id id() const { return id_; }
-            const std::string name() const { return name_; }
-         
-            //threading
-            virtual void run() = 0;
-            virtual void stop() = 0;
+				//general
+				marvin::exch_id id() const
+				{
+					return id_;
+				}
+				const std::string name() const
+				{
+					return name_;
+				}
 
-        private:
-            const marvin::exch_id   id_;
-            const std::string       name_;
-    };
+				//threading
+				virtual void run() = 0;
+				virtual void stop() = 0;
 
-    bool operator<(const Exchange& lhs, const Exchange& rhs);
+			private:
+				const marvin::exch_id   id_;
+				const std::string       name_;
+		};
 
-    typedef std::set<std::unique_ptr<Exchange>> ExchangeSet;
-    typedef arthur::static_abstract_factory<Exchange, CommandHandler::Registrar&> ExchangeFactory;
+		bool operator<(const Exchange& lhs, const Exchange& rhs);
 
-}}
+		typedef std::set<std::unique_ptr<Exchange>> ExchangeSet;
+		typedef arthur::static_abstract_factory<Exchange, CommandHandler::Registrar&> ExchangeFactory;
+
+	}
+}
 
 #endif //BETS42_DEEPTHGT_EXCHANGE_HPP

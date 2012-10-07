@@ -1,0 +1,4 @@
+The following (minor) changes have been made to the cpplint.py made available by Google:
+
+1. The auto keyword is considered a storage qualifier however as of C++11 this is no longer true. Removed auto from the storage qualifier set (e.g. from the set holding register, static, etc.)
+2. *.hpp files are considered by the script, added this as a valid file type to be analysed

@@ -6,30 +6,37 @@
 #include <bets42/deepthgt/Exchange.hpp>
 #include <string>
 
-namespace bets42 { namespace earth { namespace tick_capture {
+namespace bets42
+{
+	namespace earth
+	{
+		namespace tick_capture
+		{
 
-    class TickCapture : public deepthgt::Algo
-                      , private deepthgt::AlgoFactory::registrant<TickCapture>
-    {
-        public:
-            TickCapture(
-                deepthgt::ExchangeSet& exchanges,
-                deepthgt::CommandHandler::Registrar& cmdRegistrar);
+			class TickCapture : public deepthgt::Algo
+				, private deepthgt::AlgoFactory::registrant<TickCapture>
+			{
+				public:
+					TickCapture(
+					    deepthgt::ExchangeSet& exchanges,
+					    deepthgt::CommandHandler::Registrar& cmdRegistrar);
 
-            virtual ~TickCapture();
+					virtual ~TickCapture();
 
-            //factory
-            static const std::string& registrant_key();
+					//factory
+					static const std::string& registrant_key();
 
-            //threading
-            void run();
-            void stop();
+					//threading
+					void run();
+					void stop();
 
-        private:
-            deepthgt::ExchangeSet&  exchanges_;
-            bool                    stopped_;
-    };
+				private:
+					deepthgt::ExchangeSet&  exchanges_;
+					bool                    stopped_;
+			};
 
-}}}
+		}
+	}
+}
 
 #endif //BETS42_EARTH_TICK_CAPTURE_TICK_CAPTURE_HPP   

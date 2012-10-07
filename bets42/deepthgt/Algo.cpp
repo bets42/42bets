@@ -3,6 +3,6 @@
 using namespace bets42::deepthgt;
 
 Algo::Algo(const std::string& name)
-    : name_(name) {}
+	: name_(name) {}
 
 Algo::~Algo() {}
