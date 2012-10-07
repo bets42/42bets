@@ -8,7 +8,6 @@ namespace bets42
 {
 	namespace marvin
 	{
-
 enum class exch_id : uint8_t
 		{
 		    betdaq,
@@ -17,8 +16,7 @@ enum class exch_id : uint8_t
 		};
 
 		const std::string& to_string(const exch_id value);
-
 	}
 }
 
-#endif //BETS42_MARVIN_TYPES_HPP
+#endif  // BETS42_MARVIN_TYPES_HPP

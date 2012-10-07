@@ -1,5 +1,6 @@
 #include <bets42/arthur/string_view.hpp>
 #include <gtest/gtest.h>
+#include <algorithm>
 #include <stdexcept>
 #include <string>
 #include <sstream>
@@ -26,8 +27,8 @@ class string_view_test_fixture : public testing::Test
 
 TEST_F(string_view_test_fixture, ctor_with_std_string)
 {
-	EXPECT_NO_THROW(string_view(str_)); //l-value
-	EXPECT_NO_THROW(string_view("spud-gun-fun")); //r-value
+	EXPECT_NO_THROW(string_view(str_));  // l-value
+	EXPECT_NO_THROW(string_view("spud-gun-fun"));  // r-value
 }
 
 TEST_F(string_view_test_fixture, ctor_with_start_end)
@@ -51,15 +52,15 @@ TEST_F(string_view_test_fixture, ctor_default)
 TEST_F(string_view_test_fixture, operator_copy)
 {
 	const std::string copy("carrot-gun-fun");
-	//string_view
+	// string_view
 	string_view sv_orig(str_);
 	sv_orig = string_view(copy);
 	EXPECT_EQ(sv_orig, copy);
-	//string
+	// string
 	string_view str_orig(str_);
 	str_orig = copy;
 	EXPECT_EQ(str_orig, copy);
-	//char*
+	// char*
 	string_view char_orig(str_);
 	char_orig = copy.data();
 	EXPECT_EQ(char_orig, copy);
@@ -85,32 +86,32 @@ TEST_F(string_view_test_fixture, end)
 
 TEST_F(string_view_test_fixture, operator_at)
 {
-	//default ctor
+	// default ctor
 	EXPECT_NO_THROW(string_view()[0]);
 	EXPECT_NO_THROW(string_view()[3]);
-	//str ctor
+	// str ctor
 	EXPECT_EQ(string_view(str_)[0], str_[0]);
 	EXPECT_EQ(string_view(str_)[3], str_[3]);
-	//begin/end ctor
+	// begin/end ctor
 	EXPECT_EQ(string_view(arr_, arr_end_)[0], arr_[0]);
 	EXPECT_EQ(string_view(arr_, arr_end_)[3], arr_[3]);
-	//char/len ctor
+	// char/len ctor
 	EXPECT_EQ(string_view(arr_, arr_len_)[0], arr_[0]);
 	EXPECT_EQ(string_view(arr_, arr_len_)[3], arr_[3]);
 }
 
 TEST_F(string_view_test_fixture, at)
 {
-	//default ctor
+	// default ctor
 	EXPECT_THROW(string_view().at(0), std::out_of_range);
 	EXPECT_THROW(string_view().at(3), std::out_of_range);
-	//str ctor
+	// str ctor
 	EXPECT_EQ(string_view(str_).at(0), str_.at(0));
 	EXPECT_EQ(string_view(str_).at(3), str_.at(3));
-	//begin/end ctor
+	// begin/end ctor
 	EXPECT_EQ(string_view(arr_, arr_end_).at(0), arr_[0]);
 	EXPECT_EQ(string_view(arr_, arr_end_).at(3), arr_[3]);
-	//char/len ctor
+	// char/len ctor
 	EXPECT_EQ(string_view(arr_, arr_len_).at(0), arr_[0]);
 	EXPECT_EQ(string_view(arr_, arr_len_).at(3), arr_[3]);
 	EXPECT_THROW(string_view(arr_, arr_len_).at(arr_len_), std::out_of_range);
@@ -148,45 +149,45 @@ TEST_F(string_view_test_fixture, data)
 
 TEST_F(string_view_test_fixture, empty)
 {
-	//default ctor
+	// default ctor
 	EXPECT_TRUE(string_view().empty());
-	//str ctor
+	// str ctor
 	EXPECT_TRUE(string_view(str_empty_).empty());
 	EXPECT_FALSE(string_view(str_).empty());
-	//begin/end ctor
+	// begin/end ctor
 	EXPECT_TRUE(string_view(arr_, arr_).empty());
 	EXPECT_FALSE(string_view(arr_, arr_end_).empty());
-	//char/len ctor
+	// char/len ctor
 	EXPECT_TRUE(string_view(arr_, std::size_t(0)).empty());
 	EXPECT_FALSE(string_view(arr_, arr_len_).empty());
 }
 
 TEST_F(string_view_test_fixture, length)
 {
-	//default ctor
+	// default ctor
 	EXPECT_EQ(string_view().length(), 0);
-	//str ctor
+	// str ctor
 	EXPECT_EQ(string_view(str_empty_).length(), str_empty_.length());
 	EXPECT_EQ(string_view(str_).length(), str_.length());
-	//begin/end ctor
+	// begin/end ctor
 	EXPECT_EQ(string_view(arr_, arr_).length(), 0);
 	EXPECT_EQ(string_view(arr_, arr_end_).length(), arr_len_);
-	//char/len ctor
+	// char/len ctor
 	EXPECT_EQ(string_view(arr_, std::size_t(0)).length(), 0);
 	EXPECT_EQ(string_view(arr_, arr_len_).length(), arr_len_);
 }
 
 TEST_F(string_view_test_fixture, size)
 {
-	//default ctor
+	// default ctor
 	EXPECT_EQ(string_view().size(), 0);
-	//str ctor
+	// str ctor
 	EXPECT_EQ(string_view(str_empty_).size(), str_empty_.size());
 	EXPECT_EQ(string_view(str_).size(), str_.size());
-	//begin/end ctor
+	// begin/end ctor
 	EXPECT_EQ(string_view(arr_, arr_).size(), 0);
 	EXPECT_EQ(string_view(arr_, arr_end_).size(), arr_len_);
-	//char/len ctor
+	// char/len ctor
 	EXPECT_EQ(string_view(arr_, std::size_t(0)).size(), 0);
 	EXPECT_EQ(string_view(arr_, arr_len_).size(), arr_len_);
 }
@@ -199,15 +200,15 @@ TEST_F(string_view_test_fixture, compare_with_string_view)
 	const std::string greater_than_str("turnip-gun-fun");
 	const string_view greater_than(greater_than_str);
 
-	//str ctor
+	// str ctor
 	EXPECT_LT(string_view(str_).compare(greater_than), 0);
 	EXPECT_EQ(string_view(str_).compare(str_), 0);
 	EXPECT_GT(string_view(str_).compare(less_than), 0);
-	//begin/end ctor
+	// begin/end ctor
 	EXPECT_LT(string_view(arr_, arr_end_).compare(greater_than), 0);
 	EXPECT_EQ(string_view(arr_, arr_end_).compare(str_), 0);
 	EXPECT_GT(string_view(arr_, arr_end_).compare(less_than), 0);
-	//char/len ctor
+	// char/len ctor
 	EXPECT_LT(string_view(arr_, arr_len_).compare(greater_than), 0);
 	EXPECT_EQ(string_view(arr_, arr_len_).compare(str_), 0);
 	EXPECT_GT(string_view(arr_, arr_len_).compare(less_than), 0);
@@ -218,15 +219,15 @@ TEST_F(string_view_test_fixture, compare_with_std_string)
 	const std::string less_than("carrot-gun-fun");
 	const std::string greater_than("turnip-gun-fun");
 
-	//str ctor
+	// str ctor
 	EXPECT_LT(string_view(str_).compare(greater_than), 0);
 	EXPECT_EQ(string_view(str_).compare(str_), 0);
 	EXPECT_GT(string_view(str_).compare(less_than), 0);
-	//begin/end ctor
+	// begin/end ctor
 	EXPECT_LT(string_view(arr_, arr_end_).compare(greater_than), 0);
 	EXPECT_EQ(string_view(arr_, arr_end_).compare(str_), 0);
 	EXPECT_GT(string_view(arr_, arr_end_).compare(less_than), 0);
-	//char/len ctor
+	// char/len ctor
 	EXPECT_LT(string_view(arr_, arr_len_).compare(greater_than), 0);
 	EXPECT_EQ(string_view(arr_, arr_len_).compare(str_), 0);
 	EXPECT_GT(string_view(arr_, arr_len_).compare(less_than), 0);
@@ -253,13 +254,13 @@ TEST_F(string_view_test_fixture, operator_equal)
 	const std::string not_equal_str("parsnip-gun-fun");
 	const string_view not_equal(not_equal_str);
 
-	//string_view
+	// string_view
 	EXPECT_TRUE(comparator == comparator);
 	EXPECT_FALSE(comparator == not_equal);
-	//string
+	// string
 	EXPECT_TRUE(comparator == str_);
 	EXPECT_FALSE(comparator == not_equal_str);
-	//char*
+	// char*
 	EXPECT_TRUE(comparator == str_.data());
 	EXPECT_FALSE(comparator == not_equal_str.data());
 }
@@ -271,13 +272,13 @@ TEST_F(string_view_test_fixture, operator_not_equal)
 	const std::string not_equal_str("parsnip-gun-fun");
 	const string_view not_equal(not_equal_str);
 
-	//string_view
+	// string_view
 	EXPECT_FALSE(comparator != comparator);
 	EXPECT_TRUE(comparator != not_equal);
-	//string
+	// string
 	EXPECT_FALSE(comparator != str_);
 	EXPECT_TRUE(comparator != not_equal_str);
-	//char*
+	// char*
 	EXPECT_FALSE(comparator != str_.data());
 	EXPECT_TRUE(comparator != not_equal_str.data());
 }
@@ -292,15 +293,15 @@ TEST_F(string_view_test_fixture, operator_less_than)
 	const std::string greater_than_str("turnip-gun-fun");
 	const string_view greater_than(greater_than_str);
 
-	//string_view
+	// string_view
 	EXPECT_FALSE(comparator < comparator);
 	EXPECT_FALSE(comparator < less_than);
 	EXPECT_TRUE(comparator < greater_than);
-	//string
+	// string
 	EXPECT_FALSE(comparator < str_);
 	EXPECT_FALSE(comparator < less_than_str);
 	EXPECT_TRUE(comparator < greater_than_str);
-	//char*
+	// char*
 	EXPECT_FALSE(comparator < str_.data());
 	EXPECT_FALSE(comparator < less_than_str.data());
 	EXPECT_TRUE(comparator < greater_than_str.data());
@@ -316,15 +317,15 @@ TEST_F(string_view_test_fixture, operator_less_than_equal)
 	const std::string greater_than_str("turnip-gun-fun");
 	const string_view greater_than(greater_than_str);
 
-	//string_view
+	// string_view
 	EXPECT_TRUE(comparator <= comparator);
 	EXPECT_FALSE(comparator <= less_than);
 	EXPECT_TRUE(comparator <= greater_than);
-	//string
+	// string
 	EXPECT_TRUE(comparator <= str_);
 	EXPECT_FALSE(comparator <= less_than_str);
 	EXPECT_TRUE(comparator <= greater_than_str);
-	//char*
+	// char*
 	EXPECT_TRUE(comparator <= str_.data());
 	EXPECT_FALSE(comparator <= less_than_str.data());
 	EXPECT_TRUE(comparator <= greater_than_str.data());
@@ -340,15 +341,15 @@ TEST_F(string_view_test_fixture, operator_greater_than)
 	const std::string greater_than_str("turnip-gun-fun");
 	const string_view greater_than(greater_than_str);
 
-	//string_view
+	// string_view
 	EXPECT_FALSE(comparator > comparator);
 	EXPECT_TRUE(comparator > less_than);
 	EXPECT_FALSE(comparator > greater_than);
-	//string
+	// string
 	EXPECT_FALSE(comparator > str_);
 	EXPECT_TRUE(comparator > less_than_str);
 	EXPECT_FALSE(comparator > greater_than_str);
-	//char*
+	// char*
 	EXPECT_FALSE(comparator > str_.data());
 	EXPECT_TRUE(comparator > less_than_str.data());
 	EXPECT_FALSE(comparator > greater_than_str.data());
@@ -364,15 +365,15 @@ TEST_F(string_view_test_fixture, operator_greater_than_equal)
 	const std::string greater_than_str("turnip-gun-fun");
 	const string_view greater_than(greater_than_str);
 
-	//string_view
+	// string_view
 	EXPECT_TRUE(comparator >= comparator);
 	EXPECT_TRUE(comparator >= less_than);
 	EXPECT_FALSE(comparator >= greater_than);
-	//string
+	// string
 	EXPECT_TRUE(comparator >= str_);
 	EXPECT_TRUE(comparator >= less_than_str);
 	EXPECT_FALSE(comparator >= greater_than_str);
-	//char*
+	// char*
 	EXPECT_TRUE(comparator >= str_.data());
 	EXPECT_TRUE(comparator >= less_than_str.data());
 	EXPECT_FALSE(comparator >= greater_than_str.data());

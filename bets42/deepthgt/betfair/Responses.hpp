@@ -7,11 +7,9 @@ namespace bets42
 	{
 		namespace betfair
 		{
-
 			void createLoginResponse
-
 		}
 	}
 }
 
-#endif //BETS42_DEEPTHGT_BETFAIR_HPP
+#endif  // BETS42_DEEPTHGT_BETFAIR_HPP

@@ -16,7 +16,6 @@ namespace bets42
 {
 	namespace deepthgt
 	{
-
 		class TradingEngine
 		{
 			public:
@@ -30,7 +29,7 @@ namespace bets42
 				void run();
 
 			private:
-				//command handlers
+				// command handlers
 				std::string onGetLogLevel(const CommandHandler::Command& command);
 				std::string onSetLogLevel(const CommandHandler::Command& command);
 				std::string onShutdown(const CommandHandler::Command& command);
@@ -47,10 +46,9 @@ namespace bets42
 				mutable std::mutex      cmdMutex_;
 				mutable std::mutex      shutdownConditionMutex_;
 
-				friend class CommandHandler; //command callbacks
+				friend class CommandHandler;  // command callbacks
 		};
-
 	}
-} //namespace bets42::deepthgt
+}
 
-#endif //BETS42_DEEPTHGT_TRADAING_ENGINE_HPP
+#endif  // BETS42_DEEPTHGT_TRADAING_ENGINE_HPP

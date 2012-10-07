@@ -66,7 +66,6 @@ def main():
                 "--indent-switches",
                 "--indent-namespaces",
                 "--indent=tab",
-                "--min-conditional-indent=0",
                 "--pad-oper",
                 "--style=allman",
                 "--suffix=none",
@@ -101,10 +100,13 @@ def main():
                     -readability/streams,
                     -readability/todo,
                     -runtime/int,
+                    -runtime/references,
                     -whitespace/braces,
                     -whitespace/labels,
                     -whitespace/line_length,
                     -whitespace/newline,
+                    -whitespace/operators,
+                    -whitespace/parens,
                     -whitespace/tab""", 
                 "--counting=detailed"
             ]

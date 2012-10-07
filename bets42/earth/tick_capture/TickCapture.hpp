@@ -12,7 +12,6 @@ namespace bets42
 	{
 		namespace tick_capture
 		{
-
 			class TickCapture : public deepthgt::Algo
 				, private deepthgt::AlgoFactory::registrant<TickCapture>
 			{
@@ -23,10 +22,10 @@ namespace bets42
 
 					virtual ~TickCapture();
 
-					//factory
+					// factory
 					static const std::string& registrant_key();
 
-					//threading
+					// threading
 					void run();
 					void stop();
 
@@ -34,9 +33,8 @@ namespace bets42
 					deepthgt::ExchangeSet&  exchanges_;
 					bool                    stopped_;
 			};
-
 		}
 	}
 }
 
-#endif //BETS42_EARTH_TICK_CAPTURE_TICK_CAPTURE_HPP   
+#endif  // BETS42_EARTH_TICK_CAPTURE_TICK_CAPTURE_HPP

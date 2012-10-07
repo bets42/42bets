@@ -1,6 +1,7 @@
 #include <bets42/deepthgt/TCPSocket.hpp>
 #include <glog/logging.h>
 #include <glog/log_severity.h>
+#include <string>
 
 using namespace bets42::deepthgt;
 
@@ -30,7 +31,7 @@ void TCPSocket::listen()
 				        << "An error occured while trying to accept a client connection; error="
 				        << error.message();
 
-				sleep(1); //don't want to flood logs
+				sleep(1);  // don't want to flood logs
 			}
 		}
 		else
@@ -62,7 +63,7 @@ void TCPSocket::listen()
 
 					socket.close();
 
-					sleep(1); //don't want to flood logs
+					sleep(1);  // don't want to flood logs
 				}
 			}
 		}

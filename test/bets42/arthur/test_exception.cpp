@@ -1,5 +1,6 @@
 #include <bets42/arthur/exception.hpp>
 #include <gtest/gtest.h>
+#include <algorithm>
 #include <string>
 
 using namespace bets42::arthur;
@@ -44,9 +45,9 @@ TEST_F(exception_test_fixture, operator_stream)
 
 	try
 	{
-		//testing that stream doesn't cast exception
-		//down to a base class given operator<< is
-		//implemented in the base class
+		// testing that stream doesn't cast exception
+		// down to a base class given operator<< is
+		// implemented in the base class
 		exception ex(file(), line());
 		ex << "exception message";
 		throw ex;

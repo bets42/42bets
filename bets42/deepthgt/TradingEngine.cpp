@@ -4,8 +4,10 @@
 #include <boost/program_options.hpp>
 #include <functional>
 #include <future>
+#include <map>
 #include <sstream>
 #include <thread>
+#include <string>
 #include <vector>
 
 using namespace bets42::deepthgt;
@@ -21,7 +23,7 @@ TradingEngine::TradingEngine(const std::string& algo,
 	: entryExit_("TradingEngine")
 	, cmdHandler_(port)
 {
-	//register engine commands
+	// register engine commands
 	using namespace std::placeholders;
 	{
 		boost::program_options::options_description options("[get_log_level]\nGet log level threshold");
@@ -41,7 +43,7 @@ TradingEngine::TradingEngine(const std::string& algo,
 		cmdHandler_.registrar().registerCommand(COMPONENT, "help", options, std::bind(&TradingEngine::onHelp, this, _1));
 	}
 
-	//create exchanges
+	// create exchanges
 for(const std::string & exchange : exchanges)
 	{
 		try
@@ -60,7 +62,7 @@ for(const std::string & exchange : exchanges)
 		}
 	}
 
-	//create algo
+	// create algo
 	try
 	{
 		LOG(INFO) << "Creating algo '" << algo << "'";
@@ -145,7 +147,7 @@ std::string TradingEngine::onHelp(const CommandHandler::Command&)
 
 void TradingEngine::run()
 {
-	//run threads
+	// run threads
 	auto algoFuture(std::async(
 	                    std::launch::async,
 	                    &Algo::run,
@@ -166,13 +168,13 @@ for(auto & exchange : exchanges_)
 	                          &CommandHandler::run,
 	                          std::addressof(cmdHandler_)));
 
-	//wait for shutdown signal
+	// wait for shutdown signal
 	{
 		std::unique_lock<std::mutex> lock(shutdownConditionMutex_);
 		shutdownCondition_.wait(lock);
 	}
 
-	//join threads
+	// join threads
 	cmdHandler_.stop();
 	cmdHandlerFuture.wait();
 

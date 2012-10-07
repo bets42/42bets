@@ -15,7 +15,6 @@ namespace bets42
 {
 	namespace deepthgt
 	{
-
 		class CommandHandler;
 
 		namespace detail
@@ -83,12 +82,12 @@ namespace bets42
 				std::string usage() const;
 				std::string usage(const std::string& component) const;
 
-				//threading
+				// threading
 				void run();
 				void stop();
 
 			private:
-				//socket handler
+				// socket handler
 				std::string onSocketMessage(const std::string& msg);
 
 				boost::program_options::options_description usageImpl() const;
@@ -109,11 +108,10 @@ namespace bets42
 
 				mutable std::mutex          registryMutex_;
 
-				friend class TCPSocket; //socket callbacks
-				friend class detail::CommandRegistrar; //access to registry
+				friend class TCPSocket;  // socket callbacks
+				friend class detail::CommandRegistrar;  // access to registry
 		};
-
 	}
 }
 
-#endif //BETS42_DEEPTHGT_COMMAND_HANDLER_HPP
+#endif  // BETS42_DEEPTHGT_COMMAND_HANDLER_HPP

@@ -8,14 +8,12 @@ namespace bets42
 {
 	namespace deepthgt
 	{
-
 		struct Exception : public arthur::streaming_exception<Exception>
 		{
 			Exception(const std::string& file, const long line)
 				: arthur::streaming_exception<Exception>(file, line) {}
 		};
-
 	}
 }
 
-#endif //BETS42_DEEPTHGT_EXCEPTION_HPP
+#endif  // BETS42_DEEPTHGT_EXCEPTION_HPP

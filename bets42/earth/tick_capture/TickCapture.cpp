@@ -1,5 +1,6 @@
 #include <bets42/earth/tick_capture/TickCapture.hpp>
 #include <glog/logging.h>
+#include <string>
 
 using namespace bets42::earth::tick_capture;
 

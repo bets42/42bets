@@ -39,12 +39,16 @@ namespace bets42
 			public:
 				streaming_exception(const std::string& file, const long line)
 					: std::runtime_error("")
+					, stream_()
+					, what_()
 				{
 					stream_ << file << "[" << line << "]: ";
 				}
 
 				streaming_exception(const streaming_exception& other)
 					: std::runtime_error("")
+					, stream_()
+					, what_()
 				{
 					stream_ << other.stream_.rdbuf();
 				}

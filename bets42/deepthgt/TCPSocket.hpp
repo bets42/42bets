@@ -12,7 +12,6 @@ namespace bets42
 {
 	namespace deepthgt
 	{
-
 		class TCPSocket : private boost::noncopyable
 		{
 			public:
@@ -30,8 +29,7 @@ namespace bets42
 				boost::asio::ip::tcp::acceptor  acceptor_;
 				Callback                        callback_;
 		};
-
 	}
 }
 
-#endif //BETS42_DEEPTHGT_TCP_SOCKET_HPP
+#endif  // BETS42_DEEPTHGT_TCP_SOCKET_HPP

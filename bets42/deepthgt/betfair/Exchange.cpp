@@ -2,6 +2,7 @@
 #include <glog/logging.h>
 #include <boost/program_options.hpp>
 #include <functional>
+#include <string>
 
 using namespace bets42::deepthgt::betfair;
 
@@ -82,8 +83,8 @@ std::string Exchange::onConnect(const CommandHandler::Command& command)
 	if(std::atomic_compare_exchange_strong(&loginStatus_, &expected, LoginStatus::LOGGING_IN))
 	{
 		if(command.args().count("username")
-		   && commands.args().count("password")
-		   && commands.args().count("productID"))
+		        && commands.args().count("password")
+		        && commands.args().count("productID"))
 		{
 			createLoginRequest(
 			    commands.args()["username"].as<std::string>(),

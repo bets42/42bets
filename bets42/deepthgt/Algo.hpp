@@ -10,20 +10,19 @@ namespace bets42
 {
 	namespace deepthgt
 	{
-
 		class Algo
 		{
 			public:
 				explicit Algo(const std::string& name);
 				virtual ~Algo();
 
-				//general
+				// general
 				const std::string& name() const
 				{
 					return name_;
 				}
 
-				//threading
+				// threading
 				virtual void run() = 0;
 				virtual void stop() = 0;
 
@@ -32,8 +31,7 @@ namespace bets42
 		};
 
 		typedef arthur::static_abstract_factory<Algo, ExchangeSet&, CommandHandler::Registrar&> AlgoFactory;
-
 	}
 }
 
-#endif //BETS42_DEEPTHGT_ALGO_HPP
+#endif  // BETS42_DEEPTHGT_ALGO_HPP

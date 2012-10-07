@@ -3,7 +3,7 @@
 
 #include <bets42/deepthgt/Exchange.hpp>
 #include <bets42/deepthgt/CommandHandler.hpp>
-//#include <boost/network/protocol/http/client.hpp>
+// #include <boost/network/protocol/http/client.hpp>
 #include <atmoic>
 #include <string>
 
@@ -13,7 +13,6 @@ namespace bets42
 	{
 		namespace betfair
 		{
-
 			namespace http = boost::network::http;
 
 			class Exchange : public deepthgt::Exchange
@@ -23,17 +22,17 @@ namespace bets42
 					explicit Exchange(deepthgt::CommandHandler::Registrar& cmdRegistrar);
 					virtual ~Exchange();
 
-					//factory
+					// factory
 					static const std::string& registrant_key();
 
-					//threading
+					// threading
 					void run();
 					void stop();
 
 				private:
 					bool loginStatusCAS(LoginStatus required, LoginStatus newValue);
 
-					//command handlers
+					// command handlers
 					std::string onConnect(const CommandHandler::Command& command);
 					std::string onDisconnect(const CommandHandler::Command& command);
 
@@ -43,16 +42,15 @@ namespace bets42
 					    LOGGED_OUT, LOGGING_IN, LOGGED_IN, LOGGING_OUT
 					};
 
-					//http::client                http_;
+					// http::client                http_;
 					std::atmoic<LoginStatus>    loginStatus_;
 					std::string                 sessionID_;
 					bool                        stopped_;
 
-					friend class CommandHandler; //command handlers
+					friend class CommandHandler;  // command handlers
 			};
-
 		}
 	}
 }
 
-#endif //BETS42_DEEPTHGT_BETFAIR_EXCHANGE_HPP
+#endif  // BETS42_DEEPTHGT_BETFAIR_EXCHANGE_HPP

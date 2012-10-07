@@ -14,7 +14,6 @@ namespace prog_opts = boost::program_options;
 
 namespace
 {
-
 	struct MainException : public bets42::arthur::streaming_exception<MainException>
 	{
 		MainException(const std::string& file, const long line)
@@ -42,14 +41,13 @@ namespace
 			google::ShutdownGoogleLogging();
 		}
 	};
-
-} //namespace annonymous
+}
 
 int main(int argc, char* argv[])
 {
 	try
 	{
-		//define command line arguments
+		// define command line arguments
 		prog_opts::options_description general("General options");
 		general.add_options()
 		("help", "Show help information");
@@ -65,7 +63,7 @@ int main(int argc, char* argv[])
 		prog_opts::options_description all("42bets Usage");
 		all.add(general).add(running);
 
-		//parse and store cmd line arguments
+		// parse and store cmd line arguments
 		prog_opts::variables_map varsMap;
 
 		try
@@ -82,7 +80,7 @@ int main(int argc, char* argv[])
 		}
 
 
-		//act on cmd line arguments
+		// act on cmd line arguments
 		if(varsMap.count("help"))
 		{
 			std::cout << all << std::endl;
@@ -93,13 +91,13 @@ int main(int argc, char* argv[])
 		        && varsMap.count("log_dir")
 		        && varsMap.count("log_name"))
 		{
-			//logging
+			// logging
 			const auto logDir(varsMap["log_dir"].as<std::string>());
 			const auto logName(varsMap["log_name"].as<std::string>());
 
 			const LogInitializer logInit(logDir, logName);
 
-			//create & run engine
+			// create & run engine
 			try
 			{
 				bets42::deepthgt::TradingEngine engine(

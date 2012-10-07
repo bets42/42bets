@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <functional>
 #include <iterator>
+#include <string>
+#include <vector>
 
 using namespace bets42::deepthgt;
 
@@ -93,7 +95,7 @@ std::string CommandHandler::onSocketMessage(const std::string& msg)
 {
 	std::string response;
 
-	//split msg into tokens
+	// split msg into tokens
 	std::vector<std::string> tokens;
 	std::istringstream stream(msg);
 	std::copy(
@@ -101,21 +103,21 @@ std::string CommandHandler::onSocketMessage(const std::string& msg)
 	    std::istream_iterator<std::string>(),
 	    std::back_inserter<std::vector<std::string>>(tokens));
 
-	//process request - only send usage() when asked, otherwise it's an error
+	// process request - only send usage() when asked, otherwise it's an error
 	if(tokens.size() == 1 && tokens[0] == "help")
 	{
 		response = usage();
 	}
 	else if(tokens.size() > 1)
 	{
-		//extract component and command then remove from token set
+		// extract component and command then remove from token set
 		const std::string component(tokens[0]);
 		const std::string command(tokens[1]);
 		tokens.erase(tokens.begin(), tokens.begin() + 1);
 
 		std::lock_guard<std::mutex> lock(registryMutex_);
 
-		//lookup set of commands for module
+		// lookup set of commands for module
 		const auto componentIter(registry_.find(component));
 
 		if(componentIter == std::end(registry_))
@@ -124,7 +126,7 @@ std::string CommandHandler::onSocketMessage(const std::string& msg)
 		}
 		else
 		{
-			//find command options (for parsing args) and callback
+			// find command options (for parsing args) and callback
 			const auto commandIter(componentIter->second.find(command));
 
 			if(commandIter == std::end(componentIter->second))
@@ -133,7 +135,7 @@ std::string CommandHandler::onSocketMessage(const std::string& msg)
 			}
 			else
 			{
-				//callback with cmd then return response to socket
+				// callback with cmd then return response to socket
 				const Command cmd(command, commandIter->second.options, tokens);
 				response = commandIter->second.callback(cmd);
 			}

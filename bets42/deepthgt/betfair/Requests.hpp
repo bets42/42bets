@@ -10,8 +10,7 @@ namespace bets42
 	{
 		namespace betfair
 		{
-
-			//session management
+			// session management
 			std::ostream& createLoginRequest(
 			    std::ostream& stream,
 			    const std::string& username,
@@ -25,9 +24,8 @@ namespace bets42
 			std::ostream& createKeepAliveRequest(
 			    std::ostream& stream,
 			    const std::string& sessionID);
-
 		}
 	}
 }
 
-#endif //BETS42_DEEPTHGT_BETFAIR_REQUESTS_HPP
+#endif  // BETS42_DEEPTHGT_BETFAIR_REQUESTS_HPP
