@@ -1,5 +1,5 @@
-#ifndef BETS42_EARTH_TICK_CAPTURE_TICK_CAPTURE_HPP
-#define BETS42_EARTH_TICK_CAPTURE_TICK_CAPTURE_HPP
+#ifndef BETS42_EXAMPLE_TICK_CAPTURE_TICK_CAPTURE_HPP
+#define BETS42_EXAMPLE_TICK_CAPTURE_TICK_CAPTURE_HPP
 
 #include <bets42/deepthgt/Algo.hpp>
 #include <bets42/deepthgt/CommandHandler.hpp>
@@ -8,7 +8,7 @@
 
 namespace bets42
 {
-	namespace earth
+	namespace example
 	{
 		namespace tick_capture
 		{
@@ -37,4 +37,4 @@ namespace bets42
 	}
 }
 
-#endif  // BETS42_EARTH_TICK_CAPTURE_TICK_CAPTURE_HPP
+#endif  // BETS42_EXAMPLE_TICK_CAPTURE_TICK_CAPTURE_HPP

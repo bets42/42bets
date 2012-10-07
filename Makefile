@@ -86,7 +86,7 @@ SUBDIRS := 						\
 	bets42/arthur				\
 	bets42/deepthgt				\
 	bets42/deepthgt/betfair		\
-	bets42/earth/tick_capture	\
+	bets42/example/tick_capture	\
 	bets42/marvin
  
 include $(patsubst %, %/module.mk, $(SUBDIRS))

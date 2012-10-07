@@ -1,8 +1,8 @@
-#include <bets42/earth/tick_capture/TickCapture.hpp>
+#include <bets42/example/tick_capture/TickCapture.hpp>
 #include <glog/logging.h>
 #include <string>
 
-using namespace bets42::earth::tick_capture;
+using namespace bets42::example::tick_capture;
 
 TickCapture::TickCapture(deepthgt::ExchangeSet& exchanges,
                          deepthgt::CommandHandler::Registrar& cmdRegistrar)
