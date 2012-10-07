@@ -1,9 +1,0 @@
-# swap files
-*.swp
-*.swo
-
-# backups
-*.bck
-
-# compiled files
-*.o
