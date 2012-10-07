@@ -69,6 +69,7 @@ def main():
                 "--min-conditional-indent=0",
                 "--pad-oper",
                 "--style=allman",
+                "--suffix=none",
                 "--unpad-paren",
                 "--verbose"
             ]

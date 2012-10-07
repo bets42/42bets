@@ -5,8 +5,6 @@
 # outlining the rationale for using non-recursive make and the design 
 # of the (small) build system implemented for this project.
 #
-# https://github.com/42bets
-#
 
 # TODO:
 # 1. Configurable debug/optimised build
@@ -95,8 +93,7 @@ include $(patsubst %, %/module.mk, $(SUBDIRS))
 
 OBJS := $(patsubst %.cpp, $(BUILD_DIR)/%.o, $(filter %.cpp, $(SRCS)))
 
-DEPS := $(OBJS:.o=.d)
--include $(DEPS)    
+-include $(OBJS:.o=.d)
 
 
 
@@ -112,15 +109,14 @@ include $(patsubst %, %/module.mk, $(TEST_SUBDIRS))
 
 TEST_OBJS := $(patsubst %.cpp, $(BUILD_DIR)/%.o, $(filter %.cpp, $(SRCS) $(TEST_SRCS)))
 
-TEST_DEPS := $(TEST_OBJS:.o=.d)
--include $(TEST_DEPS)
+-include $(TEST_OBJS:.o=.d)
                             
 
 
 # --------- make TARGETS ---------
-# manually include Main.cpp instead of adding to SRCS so
-# that TEST_SRCS doesn't pick this up as its main() function, 
-# it uses the main() function provided by the gtest library
+# manually include bets42/Main.cpp instead of adding to SRCS 
+# so that TEST_SRCS doesn't pick this up as its main() function, 
+# it uses the main() function provided by the gtest_main library
 
 BINARY 		:= 42bets
 TEST_BINARY := $(BINARY)-test
