@@ -43,8 +43,8 @@ def main():
     parser.add_option("--root", dest="root", help="Absolute path to source root directory", type="string")
     (options, args) = parser.parse_args()
 
-    #check we have all the required command line arguments
-    if options.astyle and options.cppcheck and options.cpplint and options.root:
+    if options.root:
+
         #build a list of files to analyse
         files = []
         for root, dirnames, filenames in os.walk(options.root):
@@ -54,62 +54,62 @@ def main():
         print_header("Files to analyse")
         print '\n'.join(f for f in files)
 
-        #run astyle
-        astyle_cmd = [
-            options.astyle,
-            "--add-brackets",
-            "--align-pointer=type",
-            "--align-reference=type",
-            "--break-blocks",
-            "--indent-classes",
-            "--indent-col1-comments",
-            "--indent-switches",
-            "--indent-namespaces",
-            "--indent=tab",
-            "--min-conditional-indent=0",
-            "--pad-oper",
-            "--style=allman",
-            "--unpad-paren",
-            "--verbose"
-        ]
+        if options.astyle:
+            astyle_cmd = [
+                options.astyle,
+                "--add-brackets",
+                "--align-pointer=type",
+                "--align-reference=type",
+                "--break-blocks",
+                "--indent-classes",
+                "--indent-col1-comments",
+                "--indent-switches",
+                "--indent-namespaces",
+                "--indent=tab",
+                "--min-conditional-indent=0",
+                "--pad-oper",
+                "--style=allman",
+                "--unpad-paren",
+                "--verbose"
+            ]
 
-        print_header("Artistic Style")
-        print_analysis(astyle_cmd + files)
+            print_header("Artistic Style")
+            print_analysis(astyle_cmd + files)
 
-        #run cppcheck
-        cppcheck_cmd = [
-            options.cppcheck,
-            "-I " + options.root,
-            "--enable=all",
-            "--inconclusive",
-            "--std=c11",
-            "--std=c++11",
-            "--verbose"
-        ]
+        if options.cppcheck:
+            cppcheck_cmd = [
+                options.cppcheck,
+                "-I " + options.root,
+                "--enable=all",
+                "--inconclusive",
+                "--std=c11",
+                "--std=c++11",
+                "--verbose"
+            ]
 
-        print_header("cppcheck")
-        print_analysis(cppcheck_cmd + files)
+            print_header("cppcheck")
+            print_analysis(cppcheck_cmd + files)
 
-        #run google-lint
-        cpplint_cmd = [
-            "python",
-            options.cpplint,
-            """--filter=
-                -build/namespaces,
-                -legal/copyright,
-                -readability/streams,
-                -readability/todo,
-                -runtime/int,
-                -whitespace/braces,
-                -whitespace/labels,
-                -whitespace/line_length,
-                -whitespace/newline,
-                -whitespace/tab""", 
-            "--counting=detailed"
-        ]
+        if options.cpplint:
+            cpplint_cmd = [
+                "python",
+                options.cpplint,
+                """--filter=
+                    -build/namespaces,
+                    -legal/copyright,
+                    -readability/streams,
+                    -readability/todo,
+                    -runtime/int,
+                    -whitespace/braces,
+                    -whitespace/labels,
+                    -whitespace/line_length,
+                    -whitespace/newline,
+                    -whitespace/tab""", 
+                "--counting=detailed"
+            ]
 
-        print_header("google-lint")
-        print_analysis(cpplint_cmd + files)
+            print_header("google-lint")
+            print_analysis(cpplint_cmd + files)
 
     else:
         parser.error("Incorrect number/set of arguments provided, see --help")

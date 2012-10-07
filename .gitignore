@@ -7,14 +7,15 @@
 
 # C++ obj files
 *.o
-objs/
+obj/
 
 # dependency files
 *.d
-deps/
+dep/
 
 # static_cpp_code_review.cpp output files
 *.orig
+orig/
 
 # binaries
 42bets

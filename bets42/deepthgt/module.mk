@@ -1,4 +1,4 @@
-SRCS_PATH := deepthgt
+SRCS_PATH := bets42/deepthgt
 SRCS += \
 	$(SRCS_PATH)/Algo.cpp			\
 	$(SRCS_PATH)/CommandHandler.cpp	\

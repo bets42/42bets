@@ -55,7 +55,7 @@ CFLAGS :=	$(CLANG_WARNINGS) $(CLANG_CFLAGS) -DGTEST_USE_OWN_TR1_TUPLE=1
 LDFLAGS := 	$(CLANG_LDFLAGS)
 
 INCS :=     						\
-	-I../ 	                        \
+	-I. 	                        \
 	-I/usr/local/include            \
 	$(patsubst %, -I%, $(SUBDIRS))
 
@@ -77,12 +77,12 @@ TEST_LIBS := 	\
 # --------- BINARY VARS ---------
 
 SRCS :=
-SUBDIRS := 				\
-	arthur				\
-	deepthgt			\
-	deepthgt/betfair	\
-	earth/tick_capture	\
-	marvin
+SUBDIRS := 						\
+	bets42/arthur				\
+	bets42/deepthgt				\
+	bets42/deepthgt/betfair		\
+	bets42/earth/tick_capture	\
+	bets42/marvin
  
 include $(patsubst %, %/module.mk, $(SUBDIRS))
 
@@ -97,7 +97,7 @@ DEPS := $(OBJS:.o=.d)
 
 TEST_SRCS :=
 TEST_SUBDIRS := \
-	test/arthur
+	test/bets42/arthur
 
 include $(patsubst %, %/module.mk, $(TEST_SUBDIRS))
 
@@ -119,8 +119,8 @@ binary: $(BINARY)
 
 test: $(TEST_BINARY)
 
-$(BINARY): Main.o $(OBJS)
-	$(CC) -o $@ Main.o $(OBJS) $(LDFLAGS) $(LIBS)
+$(BINARY): bets42/Main.o $(OBJS)
+	$(CC) -o $@ bets42/Main.o $(OBJS) $(LDFLAGS) $(LIBS)
 
 $(TEST_BINARY): $(TEST_OBJS)
 	$(CC) -o $@ $(TEST_OBJS) $(LDFLAGS) $(TEST_LIBS)
@@ -134,7 +134,7 @@ $(TEST_BINARY): $(TEST_OBJS)
 clean:
 	rm -f $(BINARY)
 	rm -f $(TEST_BINARY)
-	rm -f $(OBJS)
+	rm -f $(OBJS) bets42/Main.o bets42/Main.d
 	rm -f $(TEST_OBJS)
 	rm -f $(DEPS)
 	rm -f $(TEST_DEPS)
