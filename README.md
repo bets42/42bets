@@ -1,17 +1,20 @@
 A big to-do!
 
+Compiler Support
+--------------------
+The codebase makes heavy use of C++11 meaning little support for older compilers. Minimum clang 3.1+ or gcc 4.7+
 
 Dependencies        
 --------------------
-glog
-gtest
-pugixml
-cpp-netlib
-boost
-clang 3.1+ or gcc 4.7+
+ * boost
+ * cpp-netlib
+ * glog
+ * gtest
+ * pugixml
 
 Optional Dependencies
 -------------------
-astyle (Artistic Style)
-cppcheck
-cpplint.py (Google-lint)
+The followng are only relevant if scripts/static_cpp_code_view.py is used:
+ * astyle (Artistic Style)
+ * cppcheck
+ * cpplint.py (Google-lint)
