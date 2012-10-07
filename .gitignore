@@ -5,13 +5,10 @@
 # backups
 *.bck
 
-# C++ obj files
+# C++ obj and dependency files
+*.d
 *.o
 obj/
-
-# dependency files
-*.d
-dep/
 
 # static_cpp_code_review.cpp output files
 *.orig

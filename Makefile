@@ -12,8 +12,7 @@
 # 1. Configurable debug/optimised build
 # 2. Configurable gcc/clang build
 # 3. split out -DGTEST_USE_OWN_TR1_TUPLE=1 from CFLAGS to TEST_CFLAGS
-# 4. write *.o and *.d to seperate directories away from source
-# 5. Ensure header-only changes result in rebuild of all dependents
+# 4. Ensure header-only changes result in rebuild of all dependents
 
 
 # --------- GCC CONFIG ---------
@@ -74,7 +73,15 @@ TEST_LIBS := 	\
 
 
 
+# --------- GENERAL BUILD VARS ---------
+
+BUILD_DIR := build
+
+
+
 # --------- BINARY VARS ---------
+# module.mk files in each of the sub-directories append to
+# SRCS to build up a complete list of source files
 
 SRCS :=
 SUBDIRS := 						\
@@ -86,7 +93,7 @@ SUBDIRS := 						\
  
 include $(patsubst %, %/module.mk, $(SUBDIRS))
 
-OBJS := $(patsubst %.cpp, %.o, $(filter %.cpp, $(SRCS)))
+OBJS := $(patsubst %.cpp, $(BUILD_DIR)/%.o, $(filter %.cpp, $(SRCS)))
 
 DEPS := $(OBJS:.o=.d)
 -include $(DEPS)    
@@ -94,6 +101,8 @@ DEPS := $(OBJS:.o=.d)
 
 
 # --------- TEST VARS ---------
+# module.mk files in each of the sub-directories append to
+# TEST_SRCS to build up a complete list of source files
 
 TEST_SRCS :=
 TEST_SUBDIRS := \
@@ -101,7 +110,7 @@ TEST_SUBDIRS := \
 
 include $(patsubst %, %/module.mk, $(TEST_SUBDIRS))
 
-TEST_OBJS := $(patsubst %.cpp, %.o, $(filter %.cpp, $(SRCS) $(TEST_SRCS)))
+TEST_OBJS := $(patsubst %.cpp, $(BUILD_DIR)/%.o, $(filter %.cpp, $(SRCS) $(TEST_SRCS)))
 
 TEST_DEPS := $(TEST_OBJS:.o=.d)
 -include $(TEST_DEPS)
@@ -109,9 +118,14 @@ TEST_DEPS := $(TEST_OBJS:.o=.d)
 
 
 # --------- make TARGETS ---------
+# manually include Main.cpp instead of adding to SRCS so
+# that TEST_SRCS doesn't pick this up as its main() function, 
+# it uses the main() function provided by the gtest library
 
 BINARY 		:= 42bets
 TEST_BINARY := $(BINARY)-test
+
+.PHONY: all binary test clean
 
 all: binary test
 
@@ -119,24 +133,24 @@ binary: $(BINARY)
 
 test: $(TEST_BINARY)
 
-$(BINARY): bets42/Main.o $(OBJS)
-	$(CC) -o $@ bets42/Main.o $(OBJS) $(LDFLAGS) $(LIBS)
+$(BINARY): $(BUILD_DIR)/bets42/Main.o $(OBJS)
+	$(CC) -o $@ $(BUILD_DIR)/bets42/Main.o $(OBJS) $(LDFLAGS) $(LIBS)
 
 $(TEST_BINARY): $(TEST_OBJS)
 	$(CC) -o $@ $(TEST_OBJS) $(LDFLAGS) $(TEST_LIBS)
 
-%.d: %.cpp
+vpath %.cpp .
+
+$(BUILD_DIR)/%.d: %.cpp
+	mkdir -p `dirname $@`
 	./scripts/depend.sh `dirname $*.cpp` $(INCS) $*.cpp > $@
 
-.cpp.o:
+$(BUILD_DIR)/%.o: %.cpp
 	$(CC) $(CFLAGS) $(INCS) $< -c -o $@
 
 clean:
 	rm -f $(BINARY)
 	rm -f $(TEST_BINARY)
-	rm -f $(OBJS) bets42/Main.o bets42/Main.d
-	rm -f $(TEST_OBJS)
-	rm -f $(DEPS)
-	rm -f $(TEST_DEPS)
+	rm -rf $(BUILD_DIR)
 
 # --------- et voila! ---------
