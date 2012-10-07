@@ -6,7 +6,7 @@ The projects name and its components are themed around The Hitchhiker's Guide to
 
  * arthur - generic C++ utilities
  * deepthgt - trading engine framework
- * examples - algorithms, implemented in terms of the framework
+ * example - algorithms, implemented in terms of the framework
  * marvin - market data and order entry protocols
 
 Compiler Support
