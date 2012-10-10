@@ -16,9 +16,9 @@ The codebase makes heavy use of C++11 meaning little support for older compilers
 Dependencies        
 --------------------
  * boost
- * cpp-netlib
  * glog
  * gtest
+ * libcurl
  * pugixml
 
 Optional Dependencies
