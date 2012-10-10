@@ -30,12 +30,12 @@ GCC_LDFLAGS :=
 
 CLANG := /opt/local/bin/clang++-mp-3.1
 
-CLANG_WARNINGS :=				\
-	-Wno-c++98-compat 			\
-	-Wno-weak-vtables  	 		\
-	-Wno-padded 				\
-	-Wno-global-constructors 	\
-	-Wno-exit-time-destructors
+CLANG_WARNINGS :=					\
+	-Wno-c++98-compat 				\
+	-Wno-exit-time-destructors		\
+	-Wno-global-constructors 		\
+	-Wno-padded 					\
+	-Wno-weak-vtables  	
 
 CLANG_CFLAGS := \
 	-g -Weverything -Wall -std=c++11 -stdlib=libc++
@@ -56,12 +56,15 @@ INCS :=     						\
 	-I/usr/local/include            \
 	$(patsubst %, -I%, $(SUBDIRS))
 
-LIBS := 								\
-	-L/usr/local/boost_1_50_0/stage/lib \
-	-L/usr/local/lib					\
-	-lboost_program_options 			\
-	-lboost_system 						\
-	-lglog 								\
+LIBS := 					\
+	-L/usr/local/ssl/lib	\
+	-lssl					\
+	-lcrypto				\
+	-L/usr/local/lib		\
+	-lboost_program_options	\
+	-lboost_system 			\
+	-lcurl					\
+	-lglog 					\
 	-lpugixml
 
 TEST_LIBS := 	\

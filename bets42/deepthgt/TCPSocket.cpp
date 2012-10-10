@@ -39,7 +39,7 @@ void TCPSocket::listen()
 			while(socket.is_open())
 			{
 				boost::asio::streambuf stream;
-				boost::asio::read_until(socket, stream, '\n', error);
+				boost::asio::read_until(socket, stream, "\n", error);
 
 				const std::string msg(
 				    (std::istreambuf_iterator<char>(&stream)),

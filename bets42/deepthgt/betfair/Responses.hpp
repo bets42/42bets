@@ -1,5 +1,5 @@
-#ifndef BETS42_DEEPTHGT_BETFAIR_HPP
-#define BETS42_DEEPTHGT_BETFAIR_HPP
+#ifndef BETS42_DEEPTHGT_BETFAIR_RESPONSES_HPP
+#define BETS42_DEEPTHGT_BETFAIR_RESPONSES_HPP
 
 namespace bets42
 {
@@ -7,9 +7,9 @@ namespace bets42
 	{
 		namespace betfair
 		{
-			void createLoginResponse
+			void createResponse(const std::string&
 		}
 	}
 }
 
-#endif  // BETS42_DEEPTHGT_BETFAIR_HPP
+#endif  // BETS42_DEEPTHGT_BETFAIR_RESPONSES_HPP

@@ -42,8 +42,6 @@ namespace bets42
 				std::unique_ptr<Algo>   algo_;
 
 				std::condition_variable shutdownCondition_;
-
-				mutable std::mutex      cmdMutex_;
 				mutable std::mutex      shutdownConditionMutex_;
 
 				friend class CommandHandler;  // command callbacks

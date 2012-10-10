@@ -32,6 +32,10 @@ namespace bets42
 				virtual void run() = 0;
 				virtual void stop() = 0;
 
+            protected:
+                enum class LoginStatus { LOGGED_OUT, LOGGING_IN, LOGGED_IN, LOGGING_OUT };
+                const std::string& asString(const LoginStatus loginStatus) const;
+
 			private:
 				const marvin::exch_id   id_;
 				const std::string       name_;

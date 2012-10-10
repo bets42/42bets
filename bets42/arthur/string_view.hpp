@@ -35,6 +35,7 @@ namespace bets42
 				explicit string_view(const std::string& str);
 				string_view(const char* const begin, const char* const end);
 				string_view(const char* const str, const size_type len);
+				explicit string_view(const char* const str);
 				string_view();
 
 				// copy assignment

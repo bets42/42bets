@@ -44,6 +44,12 @@ TEST_F(string_view_test_fixture, ctor_wth_char_and_len)
 	EXPECT_NO_THROW(string_view(arr_, arr_len_));
 }
 
+TEST_F(string_view_test_fixture, ctor_wth_char)
+{
+	EXPECT_NO_THROW(string_view(str_.data()));
+	EXPECT_NO_THROW(string_view(arr_));
+}
+
 TEST_F(string_view_test_fixture, ctor_default)
 {
 	EXPECT_NO_THROW(string_view());
@@ -73,6 +79,7 @@ TEST_F(string_view_test_fixture, begin)
 	EXPECT_EQ(*(string_view(str_).begin()), match);
 	EXPECT_EQ(*(string_view(arr_, arr_end_).begin()), match);
 	EXPECT_EQ(*(string_view(arr_, arr_len_).begin()), match);
+	EXPECT_EQ(*(string_view(arr_).begin()), match);
 }
 
 TEST_F(string_view_test_fixture, end)
@@ -82,6 +89,7 @@ TEST_F(string_view_test_fixture, end)
 	EXPECT_EQ(*(string_view(str_).end() - 1), match);
 	EXPECT_EQ(*(string_view(arr_, arr_end_).end() - 1), match);
 	EXPECT_EQ(*(string_view(arr_, arr_len_).end() - 1), match);
+	EXPECT_EQ(*(string_view(arr_).end() - 1), match);
 }
 
 TEST_F(string_view_test_fixture, operator_at)
@@ -98,6 +106,9 @@ TEST_F(string_view_test_fixture, operator_at)
 	// char/len ctor
 	EXPECT_EQ(string_view(arr_, arr_len_)[0], arr_[0]);
 	EXPECT_EQ(string_view(arr_, arr_len_)[3], arr_[3]);
+	// char ctor
+	EXPECT_EQ(string_view(arr_)[0], arr_[0]);
+	EXPECT_EQ(string_view(arr_)[3], arr_[3]);
 }
 
 TEST_F(string_view_test_fixture, at)
@@ -115,6 +126,10 @@ TEST_F(string_view_test_fixture, at)
 	EXPECT_EQ(string_view(arr_, arr_len_).at(0), arr_[0]);
 	EXPECT_EQ(string_view(arr_, arr_len_).at(3), arr_[3]);
 	EXPECT_THROW(string_view(arr_, arr_len_).at(arr_len_), std::out_of_range);
+	// char ctor
+	EXPECT_EQ(string_view(arr_).at(0), arr_[0]);
+	EXPECT_EQ(string_view(arr_).at(3), arr_[3]);
+	EXPECT_THROW(string_view(arr_).at(arr_len_), std::out_of_range);
 }
 
 TEST_F(string_view_test_fixture, front)
@@ -122,6 +137,7 @@ TEST_F(string_view_test_fixture, front)
 	EXPECT_EQ(string_view(str_).front(), str_.front());
 	EXPECT_EQ(string_view(arr_, arr_end_).front(), arr_[0]);
 	EXPECT_EQ(string_view(arr_, arr_len_).front(), arr_[0]);
+	EXPECT_EQ(string_view(arr_).front(), arr_[0]);
 }
 
 TEST_F(string_view_test_fixture, back)
@@ -129,6 +145,7 @@ TEST_F(string_view_test_fixture, back)
 	EXPECT_EQ(string_view(str_).back(), str_.back());
 	EXPECT_EQ(string_view(arr_, arr_end_).back(), *(arr_end_ - 1));
 	EXPECT_EQ(string_view(arr_, arr_len_).back(), arr_[arr_len_ - 1]);
+	EXPECT_EQ(string_view(arr_).back(), arr_[arr_len_ - 1]);
 }
 
 TEST_F(string_view_test_fixture, c_str)
@@ -137,6 +154,7 @@ TEST_F(string_view_test_fixture, c_str)
 	EXPECT_EQ(string_view(str_).c_str(), str_.data());
 	EXPECT_EQ(string_view(arr_, arr_end_).c_str(), arr_);
 	EXPECT_EQ(string_view(arr_, arr_len_).c_str(), arr_);
+	EXPECT_EQ(string_view(arr_).c_str(), arr_);
 }
 
 TEST_F(string_view_test_fixture, data)
@@ -145,6 +163,7 @@ TEST_F(string_view_test_fixture, data)
 	EXPECT_EQ(string_view(str_).data(), str_.data());
 	EXPECT_EQ(string_view(arr_, arr_end_).data(), arr_);
 	EXPECT_EQ(string_view(arr_, arr_len_).data(), arr_);
+	EXPECT_EQ(string_view(arr_).data(), arr_);
 }
 
 TEST_F(string_view_test_fixture, empty)
@@ -160,6 +179,9 @@ TEST_F(string_view_test_fixture, empty)
 	// char/len ctor
 	EXPECT_TRUE(string_view(arr_, std::size_t(0)).empty());
 	EXPECT_FALSE(string_view(arr_, arr_len_).empty());
+	// char ctor
+	EXPECT_TRUE(string_view(str_empty_.data()).empty());
+	EXPECT_FALSE(string_view(arr_).empty());
 }
 
 TEST_F(string_view_test_fixture, length)
@@ -175,6 +197,9 @@ TEST_F(string_view_test_fixture, length)
 	// char/len ctor
 	EXPECT_EQ(string_view(arr_, std::size_t(0)).length(), 0);
 	EXPECT_EQ(string_view(arr_, arr_len_).length(), arr_len_);
+	// char ctor
+	EXPECT_EQ(string_view(str_empty_.data()).length(), 0);
+	EXPECT_EQ(string_view(arr_).length(), arr_len_);
 }
 
 TEST_F(string_view_test_fixture, size)
@@ -187,9 +212,9 @@ TEST_F(string_view_test_fixture, size)
 	// begin/end ctor
 	EXPECT_EQ(string_view(arr_, arr_).size(), 0);
 	EXPECT_EQ(string_view(arr_, arr_end_).size(), arr_len_);
-	// char/len ctor
-	EXPECT_EQ(string_view(arr_, std::size_t(0)).size(), 0);
-	EXPECT_EQ(string_view(arr_, arr_len_).size(), arr_len_);
+	// char ctor
+	EXPECT_EQ(string_view(str_empty_.data()).size(), 0);
+	EXPECT_EQ(string_view(arr_).size(), arr_len_);
 }
 
 TEST_F(string_view_test_fixture, compare_with_string_view)
@@ -212,6 +237,10 @@ TEST_F(string_view_test_fixture, compare_with_string_view)
 	EXPECT_LT(string_view(arr_, arr_len_).compare(greater_than), 0);
 	EXPECT_EQ(string_view(arr_, arr_len_).compare(str_), 0);
 	EXPECT_GT(string_view(arr_, arr_len_).compare(less_than), 0);
+	// char ctor
+	EXPECT_LT(string_view(arr_).compare(greater_than), 0);
+	EXPECT_EQ(string_view(arr_).compare(str_), 0);
+	EXPECT_GT(string_view(arr_).compare(less_than), 0);
 }
 
 TEST_F(string_view_test_fixture, compare_with_std_string)
@@ -231,6 +260,10 @@ TEST_F(string_view_test_fixture, compare_with_std_string)
 	EXPECT_LT(string_view(arr_, arr_len_).compare(greater_than), 0);
 	EXPECT_EQ(string_view(arr_, arr_len_).compare(str_), 0);
 	EXPECT_GT(string_view(arr_, arr_len_).compare(less_than), 0);
+	// char ctor
+	EXPECT_LT(string_view(arr_).compare(greater_than), 0);
+	EXPECT_EQ(string_view(arr_).compare(str_), 0);
+	EXPECT_GT(string_view(arr_).compare(less_than), 0);
 }
 
 TEST_F(string_view_test_fixture, as_string)
@@ -238,6 +271,7 @@ TEST_F(string_view_test_fixture, as_string)
 	EXPECT_EQ(string_view(str_).as_string(), str_);
 	EXPECT_EQ(string_view(arr_, arr_end_).as_string(), str_);
 	EXPECT_EQ(string_view(arr_, arr_len_).as_string(), str_);
+	EXPECT_EQ(string_view(arr_).as_string(), str_);
 }
 
 TEST_F(string_view_test_fixture, operator_stream)

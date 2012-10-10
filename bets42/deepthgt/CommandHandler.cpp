@@ -34,10 +34,7 @@ bool detail::CommandRegistrar::registerCommand(const std::string& component,
 {
 	std::lock_guard<std::mutex> lock(handler_.registryMutex_);
 
-	const CommandHandler::RegistryValue value
-	{
-		options, callback
-	};
+	const CommandHandler::RegistryValue value = { options, callback };
 	const auto result(handler_.registry_[component].emplace(command, value));
 
 	if(result.second)
@@ -93,7 +90,7 @@ void CommandHandler::stop()
 
 std::string CommandHandler::onSocketMessage(const std::string& msg)
 {
-	std::string response;
+	std::stringstream response;
 
 	// split msg into tokens
 	std::vector<std::string> tokens;
@@ -106,7 +103,7 @@ std::string CommandHandler::onSocketMessage(const std::string& msg)
 	// process request - only send usage() when asked, otherwise it's an error
 	if(tokens.size() == 1 && tokens[0] == "help")
 	{
-		response = usage();
+		response << usage();
 	}
 	else if(tokens.size() > 1)
 	{
@@ -122,7 +119,7 @@ std::string CommandHandler::onSocketMessage(const std::string& msg)
 
 		if(componentIter == std::end(registry_))
 		{
-			response = "Unrecognised component, see help command";
+			response << "Unrecognised component '" << component << "', see help command";
 		}
 		else
 		{
@@ -131,22 +128,25 @@ std::string CommandHandler::onSocketMessage(const std::string& msg)
 
 			if(commandIter == std::end(componentIter->second))
 			{
-				response = "Unrecognised command, see help command";
+				response << "Unrecognised command '" << command << "', see help command";
 			}
 			else
 			{
 				// callback with cmd then return response to socket
 				const Command cmd(command, commandIter->second.options, tokens);
-				response = commandIter->second.callback(cmd);
+                LOG(INFO) << "Calling into";
+				response << commandIter->second.callback(cmd);
+                LOG(INFO) << "Calling into done";
 			}
 		}
 	}
 	else
 	{
-		response = "Invalid request, see help command";
+		response << "Invalid request '" << msg << "', see help command";
 	}
 
-	return response;
+    LOG(INFO) << "returning from";
+	return response.str();
 }
 
 boost::program_options::options_description CommandHandler::usageImpl() const

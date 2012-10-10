@@ -1,19 +1,12 @@
-# swap files
-*.swp
-*.swo
-
-# backups
 *.bck
+*.swn
+*.swo
+*.swp
 
-# C++ obj and dependency files
-*.d
-*.o
-obj/
+build/
 
-# static_cpp_code_review.cpp output files
-*.orig
-orig/
-
-# binaries
 42bets
 42bets-test
+
+# personal bits
+autocompile

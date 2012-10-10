@@ -29,6 +29,10 @@ string_view::string_view()
 	: begin_(nullptr)
 	, end_(nullptr) {}
 
+string_view::string_view(const char* const str)
+	: begin_(str)
+	, end_(str + std::strlen(str)) {}
+
 string_view& string_view::operator=(const string_view& str)
 {
 	if(this != std::addressof(str))

@@ -24,23 +24,22 @@ TradingEngine::TradingEngine(const std::string& algo,
 	, cmdHandler_(port)
 {
 	// register engine commands
-	using namespace std::placeholders;
 	{
 		boost::program_options::options_description options("[get_log_level]\nGet log level threshold");
-		cmdHandler_.registrar().registerCommand(COMPONENT, "get_log_level", options, std::bind(&TradingEngine::onGetLogLevel, this, _1));
+		cmdHandler_.registrar().registerCommand(COMPONENT, "get_log_level", options, std::bind(&TradingEngine::onGetLogLevel, this, std::placeholders::_1));
 	}
 	{
 		boost::program_options::options_description options("[set_log_level]\nSet log level threshold");
 		options.add_options()("level", boost::program_options::value<std::string>(), "Log level threshold, choose from [INFO|WARN|ERROR]");
-		cmdHandler_.registrar().registerCommand(COMPONENT, "set_log_level", options, std::bind(&TradingEngine::onSetLogLevel, this, _1));
+		cmdHandler_.registrar().registerCommand(COMPONENT, "set_log_level", options, std::bind(&TradingEngine::onSetLogLevel, this, std::placeholders::_1));
 	}
 	{
 		boost::program_options::options_description options("[shutdown]\nTerminte the process");
-		cmdHandler_.registrar().registerCommand(COMPONENT, "shutdown", options, std::bind(&TradingEngine::onShutdown, this, _1));
+		cmdHandler_.registrar().registerCommand(COMPONENT, "shutdown", options, std::bind(&TradingEngine::onShutdown, this, std::placeholders::_1));
 	}
 	{
 		boost::program_options::options_description options("[help]\nGet help information");
-		cmdHandler_.registrar().registerCommand(COMPONENT, "help", options, std::bind(&TradingEngine::onHelp, this, _1));
+		cmdHandler_.registrar().registerCommand(COMPONENT, "help", options, std::bind(&TradingEngine::onHelp, this, std::placeholders::_1));
 	}
 
 	// create exchanges
@@ -79,8 +78,6 @@ TradingEngine::~TradingEngine() {}
 
 std::string TradingEngine::onGetLogLevel(const CommandHandler::Command&)
 {
-	std::lock_guard<std::mutex> lock(cmdMutex_);
-
 	std::stringstream stream;
 	stream << "Log level threshold is " << google::GetLogSeverityName(FLAGS_minloglevel);
 	return stream.str();
@@ -88,8 +85,6 @@ std::string TradingEngine::onGetLogLevel(const CommandHandler::Command&)
 
 std::string TradingEngine::onSetLogLevel(const CommandHandler::Command& command)
 {
-	std::lock_guard<std::mutex> lock(cmdMutex_);
-
 	static const std::map<std::string, decltype(FLAGS_minloglevel)> logLevels
 	{
 		{ "INFO", google::INFO },
@@ -128,20 +123,19 @@ std::string TradingEngine::onSetLogLevel(const CommandHandler::Command& command)
 
 std::string TradingEngine::onShutdown(const CommandHandler::Command&)
 {
-	std::lock_guard<std::mutex> lock1(cmdMutex_);
-	std::lock_guard<std::mutex> lock2(shutdownConditionMutex_);
-
 	const std::string response("Proceeding to shutdown engine");
 	LOG(INFO) << response;
 
-	shutdownCondition_.notify_one();
+    {
+	    std::lock_guard<std::mutex> lock(shutdownConditionMutex_);
+	    shutdownCondition_.notify_one();
+    }
 
 	return response;
 }
 
 std::string TradingEngine::onHelp(const CommandHandler::Command&)
 {
-	std::lock_guard<std::mutex> lock(cmdMutex_);
 	return cmdHandler_.usage(COMPONENT);
 }
 
