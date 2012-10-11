@@ -6,9 +6,9 @@
 #include <boost/program_options.hpp>
 #include <boost/utility.hpp>
 #include <functional>
-#include <map>
 #include <mutex>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace bets42
@@ -99,7 +99,7 @@ namespace bets42
 					boost::program_options::options_description options;
 					Callback callback;
 				};
-				typedef std::map<std::string, std::map<std::string, RegistryValue>> CommandRegistry;
+				typedef std::unordered_map<std::string, std::map<std::string, RegistryValue>> CommandRegistry;
 
 				arthur::entry_exit          entryExit_;
 				TCPSocket                   socket_;

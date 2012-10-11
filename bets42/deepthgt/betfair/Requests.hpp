@@ -12,6 +12,10 @@ namespace bets42
 		{
             struct Request
             {
+                explicit Request(const char* const a)
+                    : action(a) {}
+
+                const char* const       action;
                 std::array<char, 4096>  data;
                 std::size_t             size;
             };

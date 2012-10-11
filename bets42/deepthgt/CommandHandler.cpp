@@ -40,12 +40,14 @@ bool detail::CommandRegistrar::registerCommand(const std::string& component,
 	if(result.second)
 	{
 		LOG(INFO)
-		        << "Registered command '" << command << "' for component '" << component << "'";
+		        << "Registered command '" << command
+                << "' for component '" << component << "'";
 	}
 	else
 	{
 		LOG(WARNING)
-		        << "Can't register command '" << command << "' for component '" << component << "', duplicate";
+		        << "Can't register command '" << command
+                << "' for component '" << component << "', duplicate";
 	}
 
 	return result.second;

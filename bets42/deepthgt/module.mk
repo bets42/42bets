@@ -3,5 +3,6 @@ SRCS += \
 	$(SRCS_PATH)/Algo.cpp			\
 	$(SRCS_PATH)/CommandHandler.cpp	\
 	$(SRCS_PATH)/Exchange.cpp		\
+	$(SRCS_PATH)/SOAP.cpp	    	\
 	$(SRCS_PATH)/TCPSocket.cpp		\
 	$(SRCS_PATH)/TradingEngine.cpp

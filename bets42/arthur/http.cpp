@@ -27,10 +27,11 @@ std::size_t detail::on_response(
     const char* response,
     const std::size_t size,
     const std::size_t nmemb,
-    http_client* client)
+    callback_type* callback)
 {
-    LOG(INFO) << "Callback";
-    return client->on_response_impl(response, size*nmemb);
+    const std::size_t response_size(size*nmemb);
+    callback->operator()(response, response_size);
+    return response_size;
 }
 
 
@@ -46,7 +47,7 @@ http_client::http_client(const char* const url, callback_type callback)
     curl_easy_setopt(curl_, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
     curl_easy_setopt(curl_, CURLOPT_ERRORBUFFER, error_);
     curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, detail::on_response);
-    curl_easy_setopt(curl_, CURLOPT_WRITEDATA, this);
+    curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &callback_);
     curl_easy_setopt(curl_, CURLOPT_CAINFO, "data/cacert.pem");
     curl_easy_setopt(curl_, CURLOPT_SSL_VERIFYPEER, 1L);
 }
@@ -56,19 +57,16 @@ http_client::~http_client()
     curl_easy_cleanup(curl_);
 }
 
-bool http_client::post_soap(
-    const char* const action,
+bool http_client::post(
+    const char* const header,
     const char* const request,
     const std::size_t request_size)
 {
-    char header_action[64] = "SOAPAction:";
-    std::strncat(header_action + 11, action, 64 - 11);
+    struct curl_slist* http_header(nullptr);
+    http_header = curl_slist_append(http_header, "Content-Type:text/xml");
+    http_header = curl_slist_append(http_header, header);
 
-    struct curl_slist* header(nullptr);
-    header = curl_slist_append(header, "Content-Type:text/xml");     //;charset=UTF-8
-    header = curl_slist_append(header, header_action);
-
-    curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, header);
+    curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, http_header);
     curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, request);
     curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, request_size);
 
@@ -77,20 +75,21 @@ bool http_client::post_soap(
 
     if(!success)
     {
-        LOG(WARNING)
+        LOG(ERROR)
             << "Error whilst sending HTTP request;"
             << " code=" << result
             << " code_str=" << curl_easy_strerror(result)
             << " error=" << error_;
     }
 
-    curl_slist_free_all(header);
+    curl_slist_free_all(http_header);
 
     return success;
 }
-
+/*
 std::size_t http_client::on_response_impl(const char* response, const std::size_t response_size)
 {
     callback_(response, response_size);
     return response_size;
 }
+*/

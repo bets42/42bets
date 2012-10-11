@@ -33,39 +33,6 @@ namespace
             "<sessionToken>SESSION_ID</sessionToken>"
         "</header>";
 
-    // global requests
-    const std::string LOGIN_XML =
-        GLOBAL_SOAP_HEADER
-        + "<ns1:login>"
-        + "<ns1:request>"
-        + "<ipAddress></ipAddress>"
-        + "<locationId>0</locationId>"
-        + "<password>PASSWORD</password>"
-        + "<productId>PRODUCT_ID</productId>"
-        + "<username>USERNAME</username>"
-        + "<vendorSoftwareId>0</vendorSoftwareId>"
-        + "</ns1:request>"
-        + "</ns1:login>"
-        + SOAP_FOOTER;
-
-    const std::string LOGOUT_XML =
-        GLOBAL_SOAP_HEADER
-        + "<ns1:logout>"
-        + "<ns1:request>"
-        + REQUEST_HEADER
-        + "</ns1:request>"
-        + "</ns1:logout>"
-        + SOAP_FOOTER;
-
-    const std::string KEEP_ALIVE_XML =
-        GLOBAL_SOAP_HEADER
-        + "<ns1:keepAlive>"
-        + "<ns1:request>"
-        + REQUEST_HEADER
-        + "</ns1:request>"
-        + "</ns1:keepAlive>"
-        + SOAP_FOOTER;
-
     // build request XML document
 	std::unique_ptr<pugi::xml_document> createRequest(const std::string& xml)
 	{
@@ -85,6 +52,9 @@ namespace
     // write XML to HTTP request
     struct XMLWriter : public pugi::xml_writer
     {
+        explicit XMLWriter(const char* const action)
+            : request(action) {}
+
         void write(const void* data, const std::size_t size)
         {
             request.size = size;
@@ -100,6 +70,20 @@ bets42::deepthgt::betfair::Request bets42::deepthgt::betfair::createLoginRequest
     const std::string& password,
     const unsigned productID)
 {
+    static const std::string LOGIN_XML =
+        GLOBAL_SOAP_HEADER
+        + "<ns1:login>"
+        + "<ns1:request>"
+        + "<ipAddress></ipAddress>"
+        + "<locationId>0</locationId>"
+        + "<password>PASSWORD</password>"
+        + "<productId>PRODUCT_ID</productId>"
+        + "<username>USERNAME</username>"
+        + "<vendorSoftwareId>0</vendorSoftwareId>"
+        + "</ns1:request>"
+        + "</ns1:login>"
+        + SOAP_FOOTER;
+
 	static auto xml = createRequest(LOGIN_XML);
 	static auto fields = std::make_tuple
 	                     (
@@ -112,7 +96,9 @@ bets42::deepthgt::betfair::Request bets42::deepthgt::betfair::createLoginRequest
 	std::get<1>(fields).text().set(password.c_str());
 	std::get<2>(fields).text().set(productID);
 
-    XMLWriter writer;
+    static const char* const action("login");
+
+    XMLWriter writer(action);
     xml->save(writer);
 
     return std::move(writer.request);
@@ -121,6 +107,15 @@ bets42::deepthgt::betfair::Request bets42::deepthgt::betfair::createLoginRequest
 bets42::deepthgt::betfair::Request bets42::deepthgt::betfair::createLogoutRequest(
     const std::string& sessionID)
 {
+    static const std::string LOGOUT_XML =
+        GLOBAL_SOAP_HEADER
+        + "<ns1:logout>"
+        + "<ns1:request>"
+        + REQUEST_HEADER
+        + "</ns1:request>"
+        + "</ns1:logout>"
+        + SOAP_FOOTER;
+
 	static auto request = createRequest(LOGOUT_XML);
 	static auto fields = std::make_tuple
 	                     (
@@ -129,7 +124,9 @@ bets42::deepthgt::betfair::Request bets42::deepthgt::betfair::createLogoutReques
 
 	std::get<0>(fields).text().set(sessionID.c_str());
 
-    XMLWriter writer;
+    static const char* const action("logout");
+
+    XMLWriter writer(action);
 	request->save(writer);
 
     return std::move(writer.request);
@@ -138,6 +135,15 @@ bets42::deepthgt::betfair::Request bets42::deepthgt::betfair::createLogoutReques
 bets42::deepthgt::betfair::Request bets42::deepthgt::betfair::createKeepAliveRequest(
     const std::string& sessionID)
 {
+    static const std::string KEEP_ALIVE_XML =
+        GLOBAL_SOAP_HEADER
+        + "<ns1:keepAlive>"
+        + "<ns1:request>"
+        + REQUEST_HEADER
+        + "</ns1:request>"
+        + "</ns1:keepAlive>"
+        + SOAP_FOOTER;
+
 	static auto request = createRequest(KEEP_ALIVE_XML);
 	static auto fields = std::make_tuple
 	                     (
@@ -146,7 +152,9 @@ bets42::deepthgt::betfair::Request bets42::deepthgt::betfair::createKeepAliveReq
 
 	std::get<0>(fields).text().set(sessionID.c_str());
 
-    XMLWriter writer;
+    static const char* const action("keepalive");
+
+    XMLWriter writer(action);
 	request->save(writer);
 
     return std::move(writer.request);

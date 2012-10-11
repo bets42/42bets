@@ -22,7 +22,7 @@ namespace bets42 { namespace arthur {
             const char* response,
             const std::size_t size,
             const std::size_t nmemb,
-            http_client* client);
+            callback_type* callback);
     }
 
     class http_client
@@ -34,12 +34,12 @@ namespace bets42 { namespace arthur {
             explicit http_client(const char* const url, callback_type callback);
             ~http_client();
 
-            bool post_soap(
-                const char* const action,
+            bool post(
+                const char* const header,
                 const char* const request,
                 const std::size_t request_size);
 
-        private:
+        /*private:
             friend std::size_t detail::on_response(
                 const char* response,
                 const std::size_t size,
@@ -48,7 +48,7 @@ namespace bets42 { namespace arthur {
 
             std::size_t on_response_impl(
                 const char* response,
-                const std::size_t size_response);
+                const std::size_t size_response); */
 
         private:
             CURL*           curl_;
