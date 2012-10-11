@@ -34,10 +34,12 @@ namespace bets42
 					// command handlers
 					std::string onRequestLogin(const CommandHandler::Command& command);
 					std::string onRequestLogout(const CommandHandler::Command& command);
+                    std::string onRequestGetActiveEventTypes(const CommandHandler::Comand& command);
 
                     // response handlers
                     void onResponseLogin(const pugi::xml_document& response);
                     void onResponseLogout(const pugi::xml_document& response);
+                    void onResponseGetActiveEventTypes(const pugi::xml_document& response);
 
                     // utils
                     bool isLoggedIn() const;

@@ -58,18 +58,22 @@ BetfairExchange::BetfairExchange(deepthgt::CommandHandler::Registrar& cmdRegistr
 	, stopped_(false)
 {
     // register commands
-	{
-		boost::program_options::options_description options("[login]\nLogin to the exchange");
-		options.add_options()("username", boost::program_options::value<std::string>(), "Account username");
-		options.add_options()("password", boost::program_options::value<std::string>(), "Account password");
-		options.add_options()("product_id", boost::program_options::value<unsigned>()->default_value(82),
-		                      "Product ID for the specific API you wish to use, defaults to 82 (free API)");
-		cmdRegistrar.registerCommand(registrant_key(), "login", options, std::bind(&BetfairExchange::onRequestLogin, this, std::placeholders::_1));
-	}
-	{
-		boost::program_options::options_description options("[logout]\nLogout from the exchange");
-		cmdRegistrar.registerCommand(registrant_key(), "logout", options, std::bind(&BetfairExchange::onRequestLogout, this, std::placeholders::_1));
-	}
+    {
+        boost::program_options::options_description options("[login]\nLogin to the exchange");
+        options.add_options()("username", boost::program_options::value<std::string>(), "Account username");
+        options.add_options()("password", boost::program_options::value<std::string>(), "Account password");
+        options.add_options()("product_id", boost::program_options::value<unsigned>()->default_value(82),
+                "Product ID for the specific API you wish to use, defaults to 82 (free API)");
+        cmdRegistrar.registerCommand(registrant_key(), "login", options, std::bind(&BetfairExchange::onRequestLogin, this, std::placeholders::_1));
+    }
+    {
+        boost::program_options::options_description options("[logout]\nLogout from the exchange");
+        cmdRegistrar.registerCommand(registrant_key(), "logout", options, std::bind(&BetfairExchange::onRequestLogout, this, std::placeholders::_1));
+    }
+    {
+        boost::program_options::options_description options("[get_sports]\nGet details of all sports supported");
+        cmdRegistrar.registerCommand(registrant_key(), "gt_sports", options, std::bind(&BetfairExchange::onRequestGetActiveEventTypes, this, std::placeholders::_1));
+    }
 
     // register SOAP response callbacks
     session_.registerCallback("n2:LoginResp", std::bind(&BetfairExchange::onResponseLogin, this, std::placeholders::_1));
@@ -92,6 +96,7 @@ void BetfairExchange::run()
 
 	while(! stopped_)
 	{
+
 		sleep(1);
 	}
 
@@ -219,6 +224,21 @@ void BetfairExchange::onResponseLogout(const pugi::xml_document& response)
     {
         loginStatus_ = Exchange::LoginStatus::LOGGED_IN;
         LOG(ERROR) << "Logout failed; " << errors;
+    }
+}
+
+void BetfairExchange::onResponseGetActiveEventTypes(const pugi::xml_document& response)
+{
+    const ErrorCodes errors(getErrorCodes(response));
+    sessionID_ = getSessionID(response);
+
+    if(errors.isOK())
+    {
+        LOG(INFO) << "GetActiveEventTypes succeeded; " << response.as_string();
+    }
+    else
+    {
+        LOG(ERROR) << "GetActiveEventTypes failed; " << errors;
     }
 }
 
