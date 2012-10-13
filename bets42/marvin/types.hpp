@@ -8,7 +8,7 @@ namespace bets42
 {
 	namespace marvin
 	{
-enum class exch_id : uint8_t
+        enum class exch_id : uint8_t
 		{
 		    betdaq,
 		    betfair

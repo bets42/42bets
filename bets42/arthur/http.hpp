@@ -17,12 +17,6 @@ namespace bets42 { namespace arthur {
         };
 
         typedef std::function<void(const char*, const std::size_t)>  callback_type;
-
-        std::size_t on_response(
-            const char* response,
-            const std::size_t size,
-            const std::size_t nmemb,
-            callback_type* callback);
     }
 
     class http_client
@@ -38,17 +32,6 @@ namespace bets42 { namespace arthur {
                 const char* const header,
                 const char* const request,
                 const std::size_t request_size);
-
-        /*private:
-            friend std::size_t detail::on_response(
-                const char* response,
-                const std::size_t size,
-                const std::size_t nmemb,
-                http_client* callback);
-
-            std::size_t on_response_impl(
-                const char* response,
-                const std::size_t size_response); */
 
         private:
             CURL*           curl_;

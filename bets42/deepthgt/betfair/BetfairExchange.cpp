@@ -1,12 +1,16 @@
 #include <bets42/deepthgt/betfair/BetfairExchange.hpp>
 #include <bets42/deepthgt/betfair/Requests.hpp>
+#include <bets42/arthur/entry_exit.hpp>
 #include <boost/program_options.hpp>
 #include <glog/logging.h>
 #include <pugixml/pugixml.hpp>
+#include <chrono>
 #include <cstring>
 #include <functional>
+#include <mutex>
 #include <ostream>
 #include <string>
+#include <thread>
 
 using namespace bets42::deepthgt::betfair;
 
@@ -54,7 +58,8 @@ namespace
 BetfairExchange::BetfairExchange(deepthgt::CommandHandler::Registrar& cmdRegistrar)
 	: Exchange(marvin::exch_id::betfair)
     , session_(URL_GLOBAL, RESPONSE_TYPE_XPATH)
-    , loginStatus_(Exchange::LoginStatus::LOGGED_OUT)
+    , loginStatus_(LoginStatus::LOGGED_OUT)
+    , requestInterval_(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::seconds(1)))
 	, stopped_(false)
 {
     // register commands
@@ -64,6 +69,8 @@ BetfairExchange::BetfairExchange(deepthgt::CommandHandler::Registrar& cmdRegistr
         options.add_options()("password", boost::program_options::value<std::string>(), "Account password");
         options.add_options()("product_id", boost::program_options::value<unsigned>()->default_value(82),
                 "Product ID for the specific API you wish to use, defaults to 82 (free API)");
+        options.add_options()("request_limit", boost::program_options::value<unsigned>(),
+                "The maximum number of requests a second that should be sent");
         cmdRegistrar.registerCommand(registrant_key(), "login", options, std::bind(&BetfairExchange::onRequestLogin, this, std::placeholders::_1));
     }
     {
@@ -71,13 +78,18 @@ BetfairExchange::BetfairExchange(deepthgt::CommandHandler::Registrar& cmdRegistr
         cmdRegistrar.registerCommand(registrant_key(), "logout", options, std::bind(&BetfairExchange::onRequestLogout, this, std::placeholders::_1));
     }
     {
+        boost::program_options::options_description options("[status]\nSelection of exchange states, e.g. login status, request limit threshold...");
+        cmdRegistrar.registerCommand(registrant_key(), "status", options, std::bind(&BetfairExchange::onRequestStatus, this, std::placeholders::_1));
+    }
+    {
         boost::program_options::options_description options("[get_sports]\nGet details of all sports supported");
-        cmdRegistrar.registerCommand(registrant_key(), "gt_sports", options, std::bind(&BetfairExchange::onRequestGetActiveEventTypes, this, std::placeholders::_1));
+        cmdRegistrar.registerCommand(registrant_key(), "get_sports", options, std::bind(&BetfairExchange::onRequestGetActiveEventTypes, this, std::placeholders::_1));
     }
 
     // register SOAP response callbacks
     session_.registerCallback("n2:LoginResp", std::bind(&BetfairExchange::onResponseLogin, this, std::placeholders::_1));
     session_.registerCallback("n2:LogoutResp", std::bind(&BetfairExchange::onResponseLogout, this, std::placeholders::_1));
+    session_.registerCallback("n2:GetEventTypesResp", std::bind(&BetfairExchange::onResponseGetActiveEventTypes, this, std::placeholders::_1));
 }
 
 BetfairExchange::~BetfairExchange() {}
@@ -92,15 +104,44 @@ const std::string& BetfairExchange::registrant_key()
 // threading
 void BetfairExchange::run()
 {
-	LOG(INFO) << "Running '" << name() << "' exchange";
+    const arthur::entry_exit entryExit("BetfairExchange thread");
+
+    bool isEmpty(true);
 
 	while(! stopped_)
 	{
+        auto start(std::chrono::high_resolution_clock::now());
 
-		sleep(1);
+        {
+            // We only acquire the lock to check if the queue is empty (this isn't
+            // an atomic operation). If it isn't then its safe to hold an iterator
+            // to the data without the lock given (a) writes - possible on another
+            // thread - don't invalidate the read iterator and (b) deletes only
+            // invalidate iterators to the deleted item and this thread is the
+            // only one which performs deletes.
+            std::lock_guard<RequestQueue> lock(requestQueue_);
+            isEmpty = requestQueue_.empty();
+        }
+
+        if( ! isEmpty)
+        {
+            RequestQueue::const_iterator requestIter(requestQueue_.begin());
+
+            if(sendRequest(*requestIter))
+            {
+                LOG(INFO) << "Processed request: " << *requestIter;
+            }
+            else
+            {
+                LOG(ERROR) << "Failed to process request: " << *requestIter;
+            }
+
+            requestQueue_.erase(requestIter);
+        }
+
+        // throttle requests to avoid data usage charges
+        std::this_thread::sleep_until(start + requestInterval_);
 	}
-
-	LOG(INFO) << "Stopped '" << name() << "' exchange";
 }
 
 void BetfairExchange::stop()
@@ -114,15 +155,21 @@ std::string BetfairExchange::onRequestLogin(const CommandHandler::Command& comma
 {
 	std::stringstream response;
 
-    if(isLoggedOut())
-	{
-        loginStatus_ = Exchange::LoginStatus::LOGGING_IN;
+    std::lock_guard<LoginStatus> lock(loginStatus_);
 
+    if(loginStatus_.isLoggedOut())
+	{
 		if(command.args().count("username")
 		    && command.args().count("password")
-		    && command.args().count("product_id"))
+		    && command.args().count("product_id")
+		    && command.args().count("request_limit"))
 		{
-            const Request request(
+            loginStatus_ = LoginStatus::LOGGING_IN;
+
+            const auto oneSec(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::seconds(1)));
+            requestInterval_ =  oneSec / command.args()["request_limit"].as<unsigned>();
+
+            const SOAPClient::Request request(
                 createLoginRequest(
                     command.args()["username"].as<std::string>(),
                     command.args()["password"].as<std::string>(),
@@ -132,7 +179,7 @@ std::string BetfairExchange::onRequestLogin(const CommandHandler::Command& comma
             // so we don't need to execute this request on the exchange's thread. Once we're
             // satisfied set the login status to LOGGED_IN which will then permit other command
             // requests to be accepted and processed
-            if(sendRequest(request) && isLoggedIn())
+            if(sendRequest(request) && loginStatus_.isLoggedIn())
             {
                 response << "Successfully logged in";
             }
@@ -148,7 +195,7 @@ std::string BetfairExchange::onRequestLogin(const CommandHandler::Command& comma
 	}
 	else
 	{
-		response << "Must be logged out in order to connect, current login status '" << Exchange::asString(loginStatus_) << "'";
+		response << "Must be logged out in order to connect, current login status '" << loginStatus_ << "'";
 	}
 
 	return response.str();
@@ -158,19 +205,21 @@ std::string BetfairExchange::onRequestLogout(const CommandHandler::Command& comm
 {
 	std::stringstream response;
 
-    if(isLoggedIn())
+    std::lock_guard<LoginStatus> lock(loginStatus_);
+
+    if(loginStatus_.isLoggedIn())
 	{
-        loginStatus_ = Exchange::LoginStatus::LOGGING_OUT;
+        loginStatus_ = LoginStatus::LOGGING_OUT;
 
         if(command.args().empty())
         {
-            const Request request(createLogoutRequest(sessionID_));
+            const SOAPClient::Request request(createLogoutRequest(sessionID_));
 
             // Now the login status is not LOGGED_IN, no more commands will be accepted
             // meaning once the request queue is empty we can synchronously logout from the
             // exchange on this thread. Once // we are satisfied the logout is successful
             // the login status will be set to LOGGED_OUT meaning only a login can be performed.
-            if(sendRequest(request) && isLoggedOut())
+            if(sendRequest(request) && loginStatus_.isLoggedOut())
             {
                 response << "Successfully logged out";
             }
@@ -186,8 +235,45 @@ std::string BetfairExchange::onRequestLogout(const CommandHandler::Command& comm
 	}
 	else
 	{
-		response << "Must be logged in order to disconnect, current login status '" << Exchange::asString(loginStatus_) << "'";
+		response << "Must be logged in order to disconnect, current login status '" << loginStatus_ << "'";
 	}
+
+	return response.str();
+}
+
+std::string BetfairExchange::onRequestStatus(const CommandHandler::Command& command)
+{
+	std::stringstream response;
+
+    if(command.args().empty())
+    {
+        response
+            << "Login Status: " << loginStatus_ << "\n"
+            << "Request Limit: " << requestInterval_.count() << "ms";
+    }
+    else
+    {
+        response << command.options();
+    }
+
+	return response.str();
+}
+
+std::string BetfairExchange::onRequestGetActiveEventTypes(const CommandHandler::Command& command)
+{
+	std::stringstream response;
+
+    if(command.args().empty())
+    {
+        enqueueRequest(
+            createGetActiveEventTypesRequest(sessionID_),
+            command,
+            response);
+    }
+    else
+    {
+        response << command.options();
+    }
 
 	return response.str();
 }
@@ -200,12 +286,12 @@ void BetfairExchange::onResponseLogin(const pugi::xml_document& response)
     if(errors.isOK())
     {
         sessionID_ = getSessionID(response);
-        loginStatus_ = Exchange::LoginStatus::LOGGED_IN;
+        loginStatus_ = LoginStatus::LOGGED_IN;
         LOG(INFO) << "Login succeeded; sessionToken=" << sessionID_;
     }
     else
     {
-        loginStatus_ = Exchange::LoginStatus::LOGGED_OUT;
+        loginStatus_ = LoginStatus::LOGGED_OUT;
         LOG(ERROR) << "Login failed; " << errors;
     }
 }
@@ -217,12 +303,12 @@ void BetfairExchange::onResponseLogout(const pugi::xml_document& response)
     if(errors.isOK())
     {
         sessionID_.clear();
-        loginStatus_ = Exchange::LoginStatus::LOGGED_OUT;
+        loginStatus_ = LoginStatus::LOGGED_OUT;
         LOG(INFO) << "Logout succeeded";
     }
     else
     {
-        loginStatus_ = Exchange::LoginStatus::LOGGED_IN;
+        loginStatus_ = LoginStatus::LOGGED_IN;
         LOG(ERROR) << "Logout failed; " << errors;
     }
 }
@@ -234,27 +320,42 @@ void BetfairExchange::onResponseGetActiveEventTypes(const pugi::xml_document& re
 
     if(errors.isOK())
     {
-        LOG(INFO) << "GetActiveEventTypes succeeded; " << response.as_string();
+        LOG(INFO) << "GetActiveEventTypes request succeeded";
     }
     else
     {
-        LOG(ERROR) << "GetActiveEventTypes failed; " << errors;
+        LOG(ERROR) << "GetActiveEventTypes request failed; " << errors;
     }
 }
 
 // utils
-bool BetfairExchange::isLoggedIn() const
+bool BetfairExchange::sendRequest(const SOAPClient::Request& request)
 {
-    return loginStatus_ == Exchange::LoginStatus::LOGGED_IN;
+    return session_.post(request);
 }
 
-bool BetfairExchange::isLoggedOut() const
+std::ostream& BetfairExchange::enqueueRequest(SOAPClient::Request&& request, const CommandHandler::Command& command, std::ostream& stream)
 {
-    return loginStatus_ == Exchange::LoginStatus::LOGGED_OUT;
-}
+    std::lock_guard<LoginStatus> lock1(loginStatus_);
 
-bool BetfairExchange::sendRequest(const Request& request)
-{
-    return session_.post(request.action, std::begin(request.data), request.size);
+    if(loginStatus_.isLoggedIn())
+	{
+        {
+            // We lock whilst pushing to ensure consumer thread
+            // doesn't try to read until the item is fully constructed
+            std::lock_guard<RequestQueue> lock2(requestQueue_);
+            requestQueue_.push_back(std::move(request));
+        }
+
+        stream << "Successfully enqueued request for command '" << command.name() << "'";
+    }
+	else
+	{
+		stream
+            << "Must be logged in order to enqueue request for command: '" << command.name()
+            << "', current login status '" << loginStatus_ << "'";
+	}
+
+	return stream;
 }
 

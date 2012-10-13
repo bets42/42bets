@@ -23,14 +23,25 @@ const detail::curl_initializer http_client::curl_init_;
 // http response handler -
 // libcurl is a C implementation and so we can't pass a pointer to
 // an http_client memeber function.
-std::size_t detail::on_response(
+std::size_t on_data(
     const char* response,
     const std::size_t size,
     const std::size_t nmemb,
-    callback_type* callback)
+    http_client::callback_type* callback)
 {
     const std::size_t response_size(size*nmemb);
     callback->operator()(response, response_size);
+    return response_size;
+}
+
+std::size_t on_header(
+    const char* response,
+    const std::size_t size,
+    const std::size_t nmemb,
+    http_client::callback_type* callback)
+{
+    const std::size_t response_size(size*nmemb);
+    LOG(INFO) << response;
     return response_size;
 }
 
@@ -46,7 +57,8 @@ http_client::http_client(const char* const url, callback_type callback)
     curl_easy_setopt(curl_, CURLOPT_NOPROGRESS  ,1L);
     curl_easy_setopt(curl_, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
     curl_easy_setopt(curl_, CURLOPT_ERRORBUFFER, error_);
-    curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, detail::on_response);
+    curl_easy_setopt(curl_, CURLOPT_HEADERFUNCTION, on_header);
+    curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, on_data);
     curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &callback_);
     curl_easy_setopt(curl_, CURLOPT_CAINFO, "data/cacert.pem");
     curl_easy_setopt(curl_, CURLOPT_SSL_VERIFYPEER, 1L);

@@ -61,16 +61,16 @@ namespace
             std::memcpy(std::begin(request.data), data, size);
         }
 
-        bets42::deepthgt::betfair::Request request;
+        bets42::deepthgt::SOAPClient::Request request;
     };
 }
 
-bets42::deepthgt::betfair::Request bets42::deepthgt::betfair::createLoginRequest(
+bets42::deepthgt::SOAPClient::Request bets42::deepthgt::betfair::createLoginRequest(
     const std::string& username,
     const std::string& password,
     const unsigned productID)
 {
-    static const std::string LOGIN_XML =
+    static const std::string XML =
         GLOBAL_SOAP_HEADER
         + "<ns1:login>"
         + "<ns1:request>"
@@ -84,7 +84,7 @@ bets42::deepthgt::betfair::Request bets42::deepthgt::betfair::createLoginRequest
         + "</ns1:login>"
         + SOAP_FOOTER;
 
-	static auto xml = createRequest(LOGIN_XML);
+	static auto xml = createRequest(XML);
 	static auto fields = std::make_tuple
 	                     (
 	                         xml->select_single_node("//username").node(),
@@ -104,10 +104,10 @@ bets42::deepthgt::betfair::Request bets42::deepthgt::betfair::createLoginRequest
     return std::move(writer.request);
 }
 
-bets42::deepthgt::betfair::Request bets42::deepthgt::betfair::createLogoutRequest(
+bets42::deepthgt::SOAPClient::Request bets42::deepthgt::betfair::createLogoutRequest(
     const std::string& sessionID)
 {
-    static const std::string LOGOUT_XML =
+    static const std::string XML =
         GLOBAL_SOAP_HEADER
         + "<ns1:logout>"
         + "<ns1:request>"
@@ -116,7 +116,7 @@ bets42::deepthgt::betfair::Request bets42::deepthgt::betfair::createLogoutReques
         + "</ns1:logout>"
         + SOAP_FOOTER;
 
-	static auto request = createRequest(LOGOUT_XML);
+	static auto request = createRequest(XML);
 	static auto fields = std::make_tuple
 	                     (
 	                         request->select_single_node("//sessionToken").node()
@@ -132,10 +132,10 @@ bets42::deepthgt::betfair::Request bets42::deepthgt::betfair::createLogoutReques
     return std::move(writer.request);
 }
 
-bets42::deepthgt::betfair::Request bets42::deepthgt::betfair::createKeepAliveRequest(
+bets42::deepthgt::SOAPClient::Request bets42::deepthgt::betfair::createKeepAliveRequest(
     const std::string& sessionID)
 {
-    static const std::string KEEP_ALIVE_XML =
+    static const std::string XML =
         GLOBAL_SOAP_HEADER
         + "<ns1:keepAlive>"
         + "<ns1:request>"
@@ -144,7 +144,7 @@ bets42::deepthgt::betfair::Request bets42::deepthgt::betfair::createKeepAliveReq
         + "</ns1:keepAlive>"
         + SOAP_FOOTER;
 
-	static auto request = createRequest(KEEP_ALIVE_XML);
+	static auto request = createRequest(XML);
 	static auto fields = std::make_tuple
 	                     (
 	                         request->select_single_node("//sessionToken").node()
@@ -152,7 +152,35 @@ bets42::deepthgt::betfair::Request bets42::deepthgt::betfair::createKeepAliveReq
 
 	std::get<0>(fields).text().set(sessionID.c_str());
 
-    static const char* const action("keepalive");
+    static const char* const action("keepAlive");
+
+    XMLWriter writer(action);
+	request->save(writer);
+
+    return std::move(writer.request);
+}
+
+bets42::deepthgt::SOAPClient::Request bets42::deepthgt::betfair::createGetActiveEventTypesRequest(
+    const std::string& sessionID)
+{
+    static const std::string XML =
+        GLOBAL_SOAP_HEADER
+        + "<ns1:getActiveEventTypes>"
+        + "<ns1:request>"
+        + REQUEST_HEADER
+        + "</ns1:request>"
+        + "</ns1:getActiveEventTypes>"
+        + SOAP_FOOTER;
+
+	static auto request = createRequest(XML);
+	static auto fields = std::make_tuple
+	                     (
+	                         request->select_single_node("//sessionToken").node()
+	                     );
+
+	std::get<0>(fields).text().set(sessionID.c_str());
+
+    static const char* const action("getActiveEventTypes");
 
     XMLWriter writer(action);
 	request->save(writer);

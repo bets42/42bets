@@ -1,19 +1,32 @@
 #include <bets42/deepthgt/SOAP.hpp>
 #include <glog/logging.h>
-#include <iterator>
 #include <cstring>
+#include <iterator>
 
 using namespace bets42::deepthgt;
 
+// Request
+detail::Request::Request(const char* const a)
+{
+    std::strcpy(std::begin(action), "SOAPAction:");
+    std::strncat(std::begin(action) + 11, a, action.size() - 11);
+}
+
+std::ostream& bets42::deepthgt::detail::operator<<(std::ostream& stream, const Request& request)
+{
+    stream << std::begin(request.data);
+    return stream;
+}
+
+
+// SOAPClient
 SOAPClient::SOAPClient(const char* const url, const char* const responseTypeXPath)
     : http_(url, std::bind(&SOAPClient::onResponse, this, std::placeholders::_1, std::placeholders::_2))
     , responseTypeQuery_(responseTypeXPath) {}
 
-bool SOAPClient::post(const char* const action, const char* const request, const std::size_t request_size)
+bool SOAPClient::post(const Request& request)
 {
-    char header[64] = "SOAPAction:";
-    std::strncat(header + 11, action, 64 - 11);
-    return http_.post(header, request, request_size);
+    return http_.post(std::begin(request.action), std::begin(request.data), request.size);
 }
 
 bool SOAPClient::registerCallback(const char* const responseType, ResponseCallback callback)

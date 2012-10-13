@@ -9,11 +9,11 @@
 //
 // For more inforamtion Google "Herb Sutter writing lock free code - a corrected queue"
 
-//TODO:
-// 1. Add support for emplace(Args&&... args) and push(T&&)
+// FIXME: WARNING - doesn't compile yet!
 
 #include <atomic>
-#include <list>
+#include <deque>
+#include <utility>
 
 namespace bets42 { namespace arthur {
 
@@ -24,23 +24,29 @@ namespace bets42 { namespace arthur {
             read_write_queue()
             {
                 // add a dummy value so we have something to point at
-                queue_.emplace_front(T());
+                queue_.push_back(T());
                 front_ = divider_ = back_ = std::begin(queue_);
             }
 
             virtual ~read_write_queue() {}
 
+            template <typename... TArgs>
+            void emplace(TArgs&&... args)
+            {
+                queue_.emplace_back(args...);
+                push_impl();
+            }
+
+            void push(T&& val)
+            {
+                queue_.push_back(val);
+                push_impl();
+            }
+
             void push(const T& val)
             {
-                // add element and then publish it by incrementing
-                // the back iterator
-                queue_.emplace_back(val);
-                ++back_;
-
-                // erase all elements that have been read, up to divider
-                auto tmp(front_);
-                queue_.erase(tmp, divider_);
-                front_ = divider_;
+                queue_.push_back(val);
+                push_impl();
             }
 
             std::pair<bool, T> pop()
@@ -56,8 +62,20 @@ namespace bets42 { namespace arthur {
             }
 
         private:
-            typedef std::list<T>                    queue_type;
-            typedef typename queue_type::iterator   iterator_type;
+            void push_impl()
+            {
+                // an element has been added, now 'publish' it
+                ++back_;
+
+                // erase all elements that have been read, up to divider
+                auto tmp(front_);
+                queue_.erase(tmp, divider_);
+                front_ = divider_;
+            }
+
+        private:
+            typedef std::deque<T> queue_type;
+            typedef std::atomic<typename queue_type::iterator> iterator_type;
 
             queue_type      queue_;
             iterator_type   front_;

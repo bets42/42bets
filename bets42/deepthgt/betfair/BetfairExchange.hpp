@@ -5,7 +5,8 @@
 #include <bets42/deepthgt/CommandHandler.hpp>
 #include <bets42/deepthgt/Exchange.hpp>
 #include <bets42/deepthgt/SOAP.hpp>
-#include <queue>
+#include <atomic>
+#include <ostream>
 #include <string>
 
 namespace pugi { class xml_document; }
@@ -17,7 +18,7 @@ namespace bets42
 		namespace betfair
 		{
 			class BetfairExchange : public Exchange
-				, private deepthgt::ExchangeFactory::registrant<BetfairExchange>
+				                  , private deepthgt::ExchangeFactory::registrant<BetfairExchange>
 			{
 				public:
 					explicit BetfairExchange(deepthgt::CommandHandler::Registrar& cmdRegistrar);
@@ -34,26 +35,33 @@ namespace bets42
 					// command handlers
 					std::string onRequestLogin(const CommandHandler::Command& command);
 					std::string onRequestLogout(const CommandHandler::Command& command);
-                    std::string onRequestGetActiveEventTypes(const CommandHandler::Comand& command);
+					std::string onRequestStatus(const CommandHandler::Command& command);
+                    std::string onRequestGetActiveEventTypes(const CommandHandler::Command& command);
 
                     // response handlers
                     void onResponseLogin(const pugi::xml_document& response);
                     void onResponseLogout(const pugi::xml_document& response);
                     void onResponseGetActiveEventTypes(const pugi::xml_document& response);
 
-                    // utils
-                    bool isLoggedIn() const;
-                    bool isLoggedOut() const;
-                    bool sendRequest(const Request& request);
+                    // request rocessing
+                    bool sendRequest(const SOAPClient::Request& request);
+                    std::ostream& enqueueRequest(
+                        SOAPClient::Request&& request,
+                        const CommandHandler::Command& command,
+                        std::ostream& stream);
 
                 private:
-                    typedef std::queue<Request> RequestQueue;
+                    typedef deepthgt::detail::LoginStatus   LoginStatus;
+                    typedef deepthgt::detail::RequestQueue  RequestQueue;
 
-                    SOAPClient              session_;
-					std::string             sessionID_;
-					Exchange::LoginStatus   loginStatus_;
-                    RequestQueue            requestQueue_;
-					bool                    stopped_;
+                    SOAPClient                  session_;
+					std::string                 sessionID_;
+					LoginStatus                 loginStatus_;
+
+                    RequestQueue                requestQueue_;
+                    std::chrono::milliseconds   requestInterval_;
+
+					std::atomic<bool>           stopped_;
 
                     friend class SOAPClient;        // http handlers
 					friend class CommandHandler;    // command handlers

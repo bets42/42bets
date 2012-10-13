@@ -41,8 +41,8 @@ namespace bets42
 				ExchangeSet             exchanges_;
 				std::unique_ptr<Algo>   algo_;
 
-				std::condition_variable shutdownCondition_;
-				mutable std::mutex      shutdownConditionMutex_;
+				mutable std::condition_variable shutdownCondition_;
+				mutable std::mutex              shutdownConditionMutex_;
 
 				friend class CommandHandler;  // command callbacks
 		};

@@ -3,15 +3,34 @@
 
 #include <bets42/arthur/http.hpp>
 #include <pugixml/pugixml.hpp>
+#include <array>
 #include <functional>
+#include <ostream>
 #include <string>
 #include <unordered_map>
 
 namespace bets42 { namespace deepthgt {
 
+    namespace detail
+    {
+        struct Request
+        {
+            explicit Request(const char* const a);
+
+            std::array<char, 64>    action;
+            std::array<char, 4096>  data;
+            std::size_t             size;
+
+            Request() {}  // for use by STL containers
+        };
+
+        std::ostream& operator<<(std::ostream& stream, const Request& request);
+    }
+
     class SOAPClient
     {
         public:
+            typedef detail::Request                                 Request;
             typedef std::function<void(const pugi::xml_document&)>  ResponseCallback;
 
         public:
@@ -19,10 +38,7 @@ namespace bets42 { namespace deepthgt {
                 const char* const url,
                 const char* const responseTypeXPath);
 
-            bool post(
-                const char* const action,
-                const char* const request,
-                const std::size_t request_size);
+            bool post(const Request& request);
 
             bool registerCallback(
                 const char* responseType,

@@ -14,12 +14,12 @@ namespace bets42
 				explicit entry_exit(const std::string& name)
 					: name_(name)
 				{
-					LOG(INFO) << "Entering " << name_;
+					LOG(INFO) << "ENTER: " << name_;
 				}
 
 				~entry_exit()
 				{
-					LOG(INFO) << "Exiting " << name_;
+					LOG(INFO) << "EXIT: " << name_;
 				}
 
 			private:
